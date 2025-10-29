@@ -7,7 +7,7 @@
 
 go语言认为：如果一个结构体以自身为接收者、实现了一个接口内的全部方法，则该结构体实现了相应接口
 
-```go 
+```code 
 type I interface {
     funcPointerReceiver()
     funcValueReceiver()
@@ -63,7 +63,7 @@ func (s s) funcValueReceiver() {
 
 一个有意思的例子：
 
-```go 
+```code 
 slice := make([]int, 0, 3)
 fmt.Println(slice) // []
 
@@ -88,7 +88,7 @@ fmt.Println(slice[:cap(slice)]) // [10 0 0]
 
 这样一来，对于值变量调用指针方法，就像**函数有一个`*int`类型的输入参数，我们传一个`int`类型变量的地址进去，函数内的修改能带出来**一样了。
 
-```go 
+```code 
 // 值变量调用指针方法，示例代码
 type s struct {
     name string
@@ -105,7 +105,7 @@ sv.funcPointerReceiver() // go编译器将当前行重写为“(&sv).funcPointer
 
 类比：函数有一个`*int`类型的输入参数，函数内的修改可以带出来
 
-```go 
+```code 
 func carryOutModify(ip *int) {
     *ip = 1
 }
@@ -116,7 +116,7 @@ carryOutModify(&intIns) // intIns = 1
 
 不可寻址的情况举例
 
-```go  
+```code  
 func newS() s {
     return s{name: "default name"}
 }
@@ -134,7 +134,7 @@ func main() {
 2. 方法内需要修改接收者：虽然值方法也可以通过**返回+重新赋值**实现修改效果，但参考上一条：定义指针方法可以避免可能存在的无意义的拷贝
 3. …… 如果只考虑结构体类型的话，似乎什么场景都可以使用指针方法？别急，来看看这个：
 
-```go 
+```code 
 type s struct {
 }
 
@@ -154,7 +154,7 @@ fmt.Println("> ptr: ", &s{})
 
 再看看这个：
 
-```go 
+```code 
 // 两个问题：
 // 1，为什么Unmarshal不是预期的结果：
 //  解：其实marshal的结果就不对了，因为结构体的值类型变量不被认为实现了指针方法，进而不被认为实现了接口，

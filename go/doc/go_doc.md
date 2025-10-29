@@ -61,7 +61,7 @@ make new panic print println real recover
     3. 十六进制：以`0x`或`0X`开头，以`a~f`或`A~F`表示`10~15`
     4. 单独的`0`表示十进制0
 2. 为了可读性，可以在**整型字面量中间**和**基数前缀后**加下划线(`_`)，这些下划线对字面量的值没有影响，参考代码：
-   ```go 
+   ```code 
    var (
        intAlias1 int = 100_000
        intAlias2 int = 0x_0010
@@ -147,7 +147,7 @@ interface类型的变量也有一个明确的动态类型（运行时分配，�
 #### 映射类型(map types)
 
 1. `map`的`key`可以是任意支持判等运算符的类型(`==`)，例如整型、字符串、指针、接口等
-   ```go 
+   ```code 
    type Inter interface {
    }
    
@@ -235,7 +235,7 @@ interface类型的变量也有一个明确的动态类型（运行时分配，�
 1. 可变参数只能放在参数列表的最后
 2. 可变参数在函数内表现为切片类型，在前面的例子中，f函数内，v的类型为`[]int`
 3. 如果传递给可变参数的是一个切片，可变参数将与传入的切片相同，且共用底层数组，参考代码：
-   ```go 
+   ```code 
    func f(str string, v ...int) {}
    
    // caller
@@ -292,7 +292,7 @@ interface类型的变量也有一个明确的动态类型（运行时分配，�
     3. 默认使用包名访问其可导出的标识符，也可以自定义包的访问名，特例与参考代码：
         1. 使用`.`作为自定义访问名，表示可以像调用当前包内标识符一样，调用目标包的可导出标识符
         2. 使用`_`作为自定义访问名，表示只调用目标包的init函数，不导入任何标识符
-        ```go 
+        ```code 
         import (
             "github.com/mats9693/document" // 常规调用格式
             . "github.com/mats9693/utils/uuid" // 假设包含A()方法
@@ -318,7 +318,7 @@ interface类型的变量也有一个明确的动态类型（运行时分配，�
 1. 首先初始化没有依赖的变量，然后重复初始化**依赖已经初始化完成的变量**
 2. 如果初始化步骤结束时，仍有变量未初始化，即存在变量循环依赖，编译报错：`initialization loop`
 3. 多值表达式会同时初始化，参考代码：
-    ```go 
+    ```code 
     var (
         x    = a
         a, b = f() // a、b同时初始化，且在x初始化之前
@@ -365,7 +365,7 @@ main包要求包名为main，并且声明一个没有输入输出参数的main�
 
 ## 短变量声明
 
-```go 
+```code 
 a := f()
 a, b := g()
 ```
@@ -392,7 +392,7 @@ a, b := g()
 4. 接口检查(interface checks)
     1. e.g. `var _ Interface = (*Struct)(nil)`，检查`Struct`类型是否实现了`Interface`接口；  
        习惯上，仅在没有静态转换的代码中使用这种声明，即，假设包含以下代码，则不需要该声明：
-    ```go 
+    ```code 
     func NewStruct() Interface {
         return &Struct{} // 这里已经包含了接口检查
     }
@@ -415,7 +415,7 @@ a, b := g()
 
 自定义构造函数：
 
-```go 
+```code 
 // from package os
 func NewFile(fd int, name string) *File {
 	if fd < 0 {
@@ -439,7 +439,7 @@ func NewFile(fd int, name string) *File {
 ### 二维slice(two-dimensional slices)
 
 1. 因为slice长度可变，所以二维slice天然可以保存没有对齐的矩阵，示例代码：
-    ```go 
+    ```code 
     type LinesOfText [][]byte     // A slice of byte slices.
     text := LinesOfText{
         []byte("Now is the time"),
@@ -479,7 +479,7 @@ func NewFile(fd int, name string) *File {
 
 1. 打印函数的格式是字符串，如：`fmt.Sprintf("%x", m)`，包括但不限于`%s`、`%x`、`%v`
 2. 给的值，其类型实现了`stringer`接口
-    ```go 
+    ```code 
     type MyString int
 
     func (m MyString) String() string {
@@ -503,7 +503,7 @@ func NewFile(fd int, name string) *File {
 
 1. iota表示从0开始，逐渐增加的自然数
 2. iota可以用作表达式的一部分，且表达式可以隐性重复
-    ```go 
+    ```code 
     const (
         _           = iota // ignore first value by assigning to blank identifier
         KB ByteSize = 1 << (10 * iota)
@@ -562,7 +562,7 @@ goroutine被多路复用到多个系统级线程上(OS threads)
 
 ### recover
 
-```go 
+```code 
 func safelyDo(work *Work) {
     defer func() {
         if err := recover(); err != nil {

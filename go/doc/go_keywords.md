@@ -17,7 +17,7 @@
     1. 标签只能出现在for/switch/select语句的上一行（中间可以有注释和空行）
     2. 标签紧挨着的语句的语句列表(statement list)包含break语句
 
-```go 
+```code 
 ALL:
     for range [3]struct{}{} {
         for range [3]struct{}{} {
@@ -47,7 +47,7 @@ ALL:
 
 1. 可使用iota，iota表示的自然数序列会在每个const语句块中初始化，在多行const中，iota的值仅与常量的位置有关 参考代码：
 
-```go 
+```code 
 const (
     c = 'x'   // 'x', iota = 0 is covered
     a = iota  // 1
@@ -67,7 +67,7 @@ const (
 1. `continue`语句终止执行最近for循环的后续语句
 2. `continue`语句可以带标签，标签只能出现在for语句的上一行，且该语句的语句列表包含continue语句， 带标签的continue语句表示跳过标签表示的for循环的后续语句，执行下一次循环。参考代码：
 
-```go 
+```code 
 func f() {
 ContinueLabel:
 	for range [3]struct{}{} {
@@ -119,7 +119,7 @@ ContinueLabel:
 
 参考代码：
 
-```go 
+```code 
 func f() {
 	defer print(1)
 	defer print(2)
@@ -131,7 +131,7 @@ func f() {
 // output: 21
 ```
 
-```go 
+```code 
 type chainCall struct {
 	n int
 }
@@ -224,7 +224,7 @@ map的`key`可以是任意类型，只要定义了`==`运算符
 
 实现约束：如果在局部作用域内，定义了与返回值同名的变量，则该作用域内，不能使用隐式返回。参考代码：
 
-```go 
+```code 
 func f() (err error) {
 	{
 		err := errors.New("new error")
@@ -258,7 +258,7 @@ select语句执行过程：
 
 以下代码包含**执行读写channel的case表达式，且副作用正常执行**、**随机选择一个case执行**以及**全部计算case表达式、只执行选中case的赋值**的演示，参考代码：
 
-```go 
+```code 
 func main() {
 	var (
 		times = 1000
@@ -322,7 +322,7 @@ func addOne(slice []int, index int) int {
     1. 要求`expression`值为`bool`类型
     2. 第一个表达式值为`true`的`case`会被执行
 3. 类型转换(type switch)
-    ```go 
+    ```code 
     // from official doc
     var t interface{}
     t = functionOfSomeType()
@@ -345,7 +345,7 @@ func addOne(slice []int, index int) int {
 定义类型  
 新类型不继承底层类型的方法集，类型别名可以，但直接继承的方法集受到package的限制（可导出的方法可以正常调用非导出的方法），参考代码：
 
-```go 
+```code 
 type S struct {
 }
 

@@ -32,7 +32,7 @@ goc_ts -i
 goc_ts -g （也可以通过`-genFrom`参数指定初始化文件）
 ```
 
-```go
+```code
 package api
 
 const URI_ListUser = "/user/list"
@@ -50,7 +50,7 @@ type CreateUserRes struct{}
 
 根据你的需求，编辑go接口文件，例如我们对`demo`文件作出如下补充：
 
-```go
+```code
 type ResBase struct {
 IsSuccess bool   `json:"is_success"`
 Err       string `json:"err"`

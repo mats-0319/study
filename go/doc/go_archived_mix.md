@@ -12,7 +12,7 @@ go fuzzing使用覆盖指导(coverage guidance)，智能遍历被测试的代码
 
 示例代码：
 
-```go 
+```code 
 func FuzzFoo(f *testing.F) {
     f.Add(5, "hello")
     f.Fuzz(func(t *testing.T, i int, s string) {
