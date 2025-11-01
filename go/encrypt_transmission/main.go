@@ -19,7 +19,7 @@ const (
 )
 
 //go:generate GOOS=linux   GOARCH=amd64 go build -o ./sample/transmission ./*.go
-//go:generate GOOS=windows GOARCH=amd64 go build -o ./sample/transmission ./*.go
+//go:generate GOOS=windows GOARCH=amd64 go build -o ./sample/transmission.exe ./*.go
 func main() {
 	go start()
 
