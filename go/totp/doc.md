@@ -7,9 +7,11 @@ Time-based One-Time Password
 
 ## 过程
 
+> 括号内为通常的默认参数
+
 - 生成密钥K，服务端与客户端共享
 - 记录协商时间T0（0）和时间步长TI（30秒）
-- 协商加密hash算法（HMAC-SHA-3）
+- 协商加密hash算法（HMAC-SHA-1）
 - 协商密码长度（6位）
 
 ## 对比
@@ -19,6 +21,8 @@ OTP -> HOTP -> TOTP
 几种算法的区别在于hash函数的原文，OTP的hash原文是随机的、HOTP使用计数器、TOTP使用时间步数
 
 ## 生成密码
+
+> 示例代码：`./demo.go`，dart代码见`github.com/mats0319/totp/lib/dart/totp.dart`
 
 - OTP(K,C) = Truncate(HMAC-SHA-1(K,C)) -> C是随机数，T是截取函数
 - step 1：sha-1得到20 Bytes，取最后一个Byte的后4 bits作为起始索引（起始索引属于0～15）

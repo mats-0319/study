@@ -23,3 +23,13 @@ func TestGenerateRandomIntSlice(t *testing.T) {
 	//[-4 -8 10 4 -6 6 -10 0 -10 0]
 	//[-2 -6 -4 -6 -6 -6 -2 6 4 -4]
 }
+
+func TestGenerateRandomBytes(t *testing.T) {
+	for range [3]struct{}{} {
+		fmt.Println(string(GenerateRandomBytes(20)))
+
+		//kTGIilO7A3j8OMqPV7lp
+		//b4dAz7JLxqgChukX7ooa
+		//bA8qe0CM7KMtf3LWvqIo
+	}
+}

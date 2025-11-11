@@ -12,13 +12,16 @@
     - [x] generate avatar：生成像素风格对称图片，可用作默认头像
     - [x] goc_ts：根据go语言定义的接口结构，生成http请求对应的ts相关代码
     - [x] uuid：google uuid，新增**输入相同参数，输出相同id**功能
-    - [x] totp：mainly for github 2FA（Time-based One-Time Password)
+    - [x] totp：使用go实现RFC 6238标准的demo，包含base32编解码、totp计算
     - [x] utils
 - vue3
     - [ ] vue doc：官方文档阅读笔记
     - [x] vue ecology：vue生态，包括但不限于pinia、vite config、ts编译选项
     - [x] vue router
     - [ ] eslint
+- android
+    - [ ] dart：简单过一遍dart语法，知道dart代码大概是什么样子的
+    - [ ] flutter：学习flutter官方文档提供的codelab
 - 笔记
     - [x] github使用记录
     - [x] makefile学习笔记
