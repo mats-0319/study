@@ -12,10 +12,10 @@
 
 ## break
 
-1. 可以用在for循环、switch/select的case中
-2. 可以通过带一个参数（标签），退出并跳过标签标识的for/switch/select语句，一个**有效的标签**应满足以下条件：
-    1. 标签只能出现在for/switch/select语句的上一行（中间可以有注释和空行）
-    2. 标签紧挨着的语句的语句列表(statement list)包含break语句
+- 可以用在for循环、switch/select的case中
+- 可以通过带一个参数（标签），退出并跳过标签标识的for/switch/select语句，一个**有效的标签**应满足以下条件：
+    - 标签只能出现在for/switch/select语句的上一行（中间可以有注释和空行）
+    - 标签紧挨着的语句的语句列表(statement list)包含break语句
 
 ```code 
 ALL:
@@ -30,10 +30,10 @@ ALL:
 
 ## chan
 
-1. 可以用来声明和定义`channel`，`channel`包含读写、只读、只写三种类型，
-    1. 只读和只写多见于函数输入参数位置，为了控制该函数权限
-2. 可以使用内置函数`close`关闭`channel`
-3. 读写不同状态`channel`的结果：
+- 可以用来声明和定义`channel`，`channel`包含读写、只读、只写三种类型，
+    - 只读和只写多见于函数输入参数位置，为了控制该函数权限
+- 可以使用内置函数`close`关闭`channel`
+- 读写不同状态`channel`的结果：
 
 |            | read             | write                           | note                                                                  |
 |------------|------------------|---------------------------------|-----------------------------------------------------------------------|
@@ -45,7 +45,7 @@ ALL:
 
 ## const
 
-1. 可使用iota，iota表示的自然数序列会在每个const语句块中初始化，在多行const中，iota的值仅与常量的位置有关 参考代码：
+- 可使用iota，iota表示的自然数序列会在每个const语句块中初始化，在多行const中，iota的值仅与常量的位置有关 参考代码：
 
 ```code 
 const (
@@ -64,8 +64,9 @@ const (
 
 ## continue
 
-1. `continue`语句终止执行最近for循环的后续语句
-2. `continue`语句可以带标签，标签只能出现在for语句的上一行，且该语句的语句列表包含continue语句， 带标签的continue语句表示跳过标签表示的for循环的后续语句，执行下一次循环。参考代码：
+- `continue`语句终止执行最近for循环的后续语句
+- `continue`语句可以带标签，标签只能出现在for语句的上一行，且该语句的语句列表包含continue语句，
+  带标签的continue语句表示跳过标签表示的for循环的后续语句，执行下一次循环。参考代码：
 
 ```code 
 func f() {
@@ -107,15 +108,15 @@ ContinueLabel:
 
 ## defer
 
-1. `defer`函数的参数会被立刻求值
-2. `defer`函数在`return`语句为返回值赋值之后、函数退出之前执行
-    1. `defer`函数可能改变当前函数的返回值
-3. 如果`defer`的函数为`nil`，则执行时panic
-4. `defer`函数自己的返回值会被丢弃
-5. `defer`语句会压栈（注册）一个函数：
-    1. 如果`defer`表达式为一串链式调用，则之前的调用函数会立刻执行，仅最后一个函数会被压栈
-    2. 后注册的`defer`函数先执行
-6. 若显式调用`os.Exit()`，则注册的`defer`函数不会执行
+- `defer`函数的参数会被立刻求值
+- `defer`函数在`return`语句为返回值赋值之后、函数退出之前执行
+    - `defer`函数可能改变当前函数的返回值
+- 如果`defer`的函数为`nil`，则执行时panic
+- `defer`函数自己的返回值会被丢弃
+- `defer`语句会压栈（注册）一个函数：
+    - 如果`defer`表达式为一串链式调用，则之前的调用函数会立刻执行，仅最后一个函数会被压栈
+    - 后注册的`defer`函数先执行
+- 若显式调用`os.Exit()`，则注册的`defer`函数不会执行
 
 参考代码：
 
@@ -161,19 +162,19 @@ func f() {
 
 三种形式：
 
-1. 单一条件(single condition)，类似其他语言的while循环，形如`for a < b { }`
-2. for子句(for clause)，类似其他语言的for循环，形如`for i := 0; i < 10; i++ { }`
-3. range子句(range clause)，与range关键字联合使用，形如`for i, v := range arr { }`
+- 单一条件(single condition)，类似其他语言的while循环，形如`for a < b { }`
+- for子句(for clause)，类似其他语言的for循环，形如`for i := 0; i < 10; i++ { }`
+- range子句(range clause)，与range关键字联合使用，形如`for i, v := range arr { }`
 
 在for语句中声明的变量（在for子句和range子句形式中，使用短变量声明），作用域是for语句体，每次迭代会被重复使用
 
 ## func
 
-1. 函数可以返回多个值
-2. 函数输出参数可以命名，然后当做常规变量使用，就像输入参数一样
-    1. 具名的输出参数，会在函数开始时，被初始化为对应类型的零值
-    2. 若函数有多个输出参数，要么全部命名、要么全部不命名，不允许只为部分输出参数命名
-    3. 拥有具名输出参数的函数，`return`可以不带参数
+- 函数可以返回多个值
+- 函数输出参数可以命名，然后当做常规变量使用，就像输入参数一样
+    - 具名的输出参数，会在函数开始时，被初始化为对应类型的零值
+    - 若函数有多个输出参数，要么全部命名、要么全部不命名，不允许只为部分输出参数命名
+    - 拥有具名输出参数的函数，`return`可以不带参数
 
 ## go
 
@@ -239,24 +240,25 @@ func f() (err error) {
 
 ## select
 
-1. select与switch结构上相似，但不支持fallthrough关键字
-2. select语句要求每一个`case`都是通信操作(communication operations)
+- select与switch结构上相似，但不支持fallthrough关键字
+- select语句要求每一个`case`都是通信操作(communication operations)
 
 select语句执行过程：
 
-1. 计算所有case子句中，**符合条件的表达式**，所有副作用(side effects)正常执行；接收语句左侧的赋值语句（包括短变量声明）不会执行。
-    1. 符合条件的表达式：指发送或接收操作的额外表达式，即channel操作符右侧的表达式，  
-       举例：`ch <- <-ch1`/`<- getValue()`中的`<-ch1`/`getValue()`，会在下一步*选择分支*之前计算  
-       进一步，如果`<-ch1`阻塞，则整个select阻塞
-2. 选择分支：
-    1. 若存在可继续的通信（case），则通过统一的伪随机(uniform pseudo-random)选择一个
-    2. 若不存在可继续的通信（case），则选择default语句执行；若无default子句，则select语句阻塞，直到有一个case可以继续或死锁（全部goroutine阻塞）
-3. 执行准备：
-    1. 执行选中case子句的表达式（case到分号之间的部分）
-    2. 若选中default子句，直接进入下一步
-4. 执行选中case的语句块
+- 计算所有case子句中，**符合条件的表达式**，所有副作用(side effects)正常执行；接收语句左侧的赋值语句（包括短变量声明）不会执行。
+    - 符合条件的表达式：指发送或接收操作的额外表达式，即channel操作符右侧的表达式，  
+      举例：`ch <- <-ch1`/`<- getValue()`中的`<-ch1`/`getValue()`，会在下一步*选择分支*之前计算  
+      进一步，如果`<-ch1`阻塞，则整个select阻塞
+- 选择分支：
+    - 若存在可继续的通信（case），则通过统一的伪随机(uniform pseudo-random)选择一个
+    - 若不存在可继续的通信（case），则选择default语句执行；若无default子句，则select语句阻塞，直到有一个case可以继续或死锁（全部goroutine阻塞）
+- 执行准备：
+    - 执行选中case子句的表达式（case到分号之间的部分）
+    - 若选中default子句，直接进入下一步
+- 执行选中case的语句块
 
-以下代码包含**执行读写channel的case表达式，且副作用正常执行**、**随机选择一个case执行**以及**全部计算case表达式、只执行选中case的赋值**的演示，参考代码：
+以下代码包含**执行读写channel的case表达式，且副作用正常执行**、**随机选择一个case执行**以及**全部计算case表达式、只执行选中case的赋值
+**的演示，参考代码：
 
 ```code 
 func main() {
@@ -317,11 +319,11 @@ func addOne(slice []int, index int) int {
 
 ## switch
 
-1. 类似C语言的switch：`switch [expression] {}`
-2. 把一连串`if-else`写成switch：`switch {case [expression]: // do sth}`
-    1. 要求`expression`值为`bool`类型
-    2. 第一个表达式值为`true`的`case`会被执行
-3. 类型转换(type switch)
+- 类似C语言的switch：`switch [expression] {}`
+- 把一连串`if-else`写成switch：`switch {case [expression]: // do sth}`
+    - 要求`expression`值为`bool`类型
+    - 第一个表达式值为`true`的`case`会被执行
+- 类型转换(type switch)
     ```code 
     // from official doc
     var t interface{}
