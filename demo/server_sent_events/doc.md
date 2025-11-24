@@ -7,10 +7,10 @@
 
 本demo包含：
 
-1. 基础sse功能
-2. https
-3. go操作cookie（读写）
-5. 通知多人
+- 基础sse功能
+- https
+- go操作cookie（读写）
+- 通知多人
 
 ## 使用手册
 

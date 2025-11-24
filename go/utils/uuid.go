@@ -1,7 +1,8 @@
-package uuid
+package utils
 
 import (
 	"crypto/sha256"
+
 	"github.com/google/uuid"
 )
 

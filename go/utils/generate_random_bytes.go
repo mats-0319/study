@@ -2,8 +2,8 @@ package utils
 
 import "math/rand/v2"
 
-const randomCharactersLibrary = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const useBits = 6 // 6个bit位可以表示全部随机字符库中的字符
+const CharactersLibrary = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const useBits = 6 // 6个bit位可以表示全部字符库中的字符
 
 // GenerateRandomBytes generate random 'length' readable Bytes
 func GenerateRandomBytes(length int) []byte {
@@ -16,11 +16,11 @@ func GenerateRandomBytes(length int) []byte {
 		}
 
 		index := int(randomNum & (1<<useBits - 1)) // 0b0011 1111
-		if index < len(randomCharactersLibrary) {
+		if index < len(CharactersLibrary) {
 			randomNum >>= useBits
 			remainBits -= useBits
 
-			b[i] = randomCharactersLibrary[index]
+			b[i] = CharactersLibrary[index]
 			i++
 		} else {
 			randomNum >>= 1

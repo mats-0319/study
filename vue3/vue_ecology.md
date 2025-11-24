@@ -24,14 +24,14 @@ export const useCounterStore = defineStore('counter', () => {
 
 解构会破坏响应性，推荐不定义新的变量、直接使用：
 
-```ts
-<script setup>
+```vue
+<script setup lang="ts">
 const store = useCounterStore()
 // ❌ 这将不起作用，因为它破坏了响应性
 // 这就和直接解构 `props` 一样
 const { name, doubleCount } = store 
-name // 将始终是 "Eduardo" 
-doubleCount // 将始终是 0 
+// name将始终是 "Eduardo" 
+// doubleCount将始终是 0 
 setTimeout(() => {
   store.increment()
 }, 1000)
@@ -43,9 +43,23 @@ const doubleValue = computed(() => store.doubleCount)
 
 ### 持久化
 
-使用新的组件库：https://prazdevs.github.io/pinia-plugin-persistedstate/zh/guide/
+```code 
+const loginStore = useLoginStore();
 
-需要编辑main.ts，以及在每个需要持久化的pinia组件中明确设置。具体参考上方文档。
+onMounted(() => {
+  window.addEventListener("beforeunload", () => {
+    sessionStorage.setItem("login_data", JSON.stringify(loginStore.user))
+  })
+
+  let loginData = sessionStorage.getItem("login_data")
+  if (!loginData) {
+    return
+  }
+
+  loginStore.user = deepCopy(JSON.parse(loginData))
+  sessionStorage.removeItem("login_data")
+})
+```
 
 ## vite配置文档
 
@@ -56,7 +70,7 @@ const doubleValue = computed(() => store.doubleCount)
 
 path包需要安装依赖：@types/node
 
-```ts
+```code
 resolve: {
     alias: {
         '@': path.resolve(__dirname, './src'),
@@ -68,7 +82,7 @@ resolve: {
 
 server.host：如果将此设置为 `0.0.0.0` 或者 `true` 将监听所有地址，包括局域网和公网地址，可能响应的是其他服务器而不是 Vite。
 
-## ts编译选项 draft
+## ts编译选项(draft)
 
 > 学习时间：
 > ts编译选项文档(tsconfig.json)：https://www.typescriptlang.org/docs/handbook/compiler-options.html

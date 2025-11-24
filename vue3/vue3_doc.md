@@ -93,8 +93,8 @@ todo
 
 主要使用`ref`定义，在`script`部分使用时需要加`.value`，`html`部分不用：
 
-1. html部分也可以使用.value访问，只是大部分情况下vue会自动解包
-2. 顶级的ref属性会被解包，或者绑定的内容为变量本身、而不是表达式，也会解包
+- html部分也可以使用.value访问，只是大部分情况下vue会自动解包
+- 顶级的ref属性会被解包，或者绑定的内容为变量本身、而不是表达式，也会解包
 
 ```vue
 import { ref } from 'vue'
@@ -125,8 +125,8 @@ const { id } = object
 
 相较于函数，计算属性有缓存：只要计算属性依赖的内容没有发生变化，多次调用计算属性只会返回缓存结果而不会重新计算：
 
-1. 计算属性的缓存特性适用于变量本身较大的情况，例如下方代码中`books`是一个很大的数组
-2. 计算属性和函数的刷新节点不同：  
+- 计算属性的缓存特性适用于变量本身较大的情况，例如下方代码中`books`是一个很大的数组
+- 计算属性和函数的刷新节点不同：  
    例如在另一个函数中改变了`books`，计算属性刷新、函数不刷新；  
    而一些非响应式依赖则会在调用函数时刷新、计算属性不刷新，如`const now = computed(() => Date.now())`
 
@@ -159,9 +159,9 @@ const publishedBooksMessage = computed<string>(() => {
 
 基本语法：`<div :class="{ 'active': isActive }"></div>`
 
-1. active表示样式名，例如`text-alive`，一般写在style部分
-2. isActive表示是否绑定该样式，类型是bool
-3. 动态绑定可以和静态绑定同时存在
+- active表示样式名，例如`text-alive`，一般写在style部分
+- isActive表示是否绑定该样式，类型是bool
+- 动态绑定可以和静态绑定同时存在
 
 无论是动态还是静态绑定样式，如果**子组件有多个顶级html元素**，就需要`$attrs`属性来指定：  
 当父组件调用子组件时，如果也给了样式，应该绑定到子组件的哪个元素上，示例代码如下：
@@ -187,9 +187,9 @@ const publishedBooksMessage = computed<string>(() => {
 
 相较于`v-show`：
 
-1. v-if会销毁、重新生成dom元素，v-show只是控制其display属性
-2. v-show不支持用在`template`上，也不支持v-else
-3. v-if切换开销更大，但v-if只有在值第一次为true时才初始化dom
+- v-if会销毁、重新生成dom元素，v-show只是控制其display属性
+- v-show不支持用在`template`上，也不支持v-else
+- v-if切换开销更大，但v-if只有在值第一次为true时才初始化dom
 
 v-if与v-for同级时，v-if优先级更高，这意味着v-if无法访问v-for中的迭代对象。不建议这么做，可以在v-if外层套一个`template v-for`：
 
@@ -207,11 +207,11 @@ v-if与v-for同级时，v-if优先级更高，这意味着v-if无法访问v-for�
 
 基本语法：`v-for="(item, index) in items"`/`v-for="(value, key， index) in myObject"`/`v-for="n in 10"`
 
-1. item表示迭代变量名
-2. index表示当前迭代序号
-3. in可以换成of
-4. 可以用于遍历一个对象的所有属性，顺序根据`Object.keys()`
-5. 可以用于渲染固定次数：`n次，n∈[1,10]`
+- item表示迭代变量名
+- index表示当前迭代序号
+- in可以换成of
+- 可以用于遍历一个对象的所有属性，顺序根据`Object.keys()`
+- 可以用于渲染固定次数：`n次，n∈[1,10]`
 
 可以像v-if一样，使用`template`组合多个html元素
 
@@ -248,17 +248,17 @@ v-model指令可以简化这种写法：`<input v-model="text">`
 
 v-model 还可以用于各种不同类型的输入，<textarea>、<select> 元素。它会根据所使用的元素自动使用对应的 DOM 属性和事件组合：
 
-1. 文本类型的 <input> 和 <textarea> 元素会绑定 value property 并侦听 input 事件；
-2. `<input type="checkbox">` 和 `<input type="radio">` 会绑定 checked property 并侦听 change 事件；
-3. `<select>` 会绑定 value property 并侦听 change 事件。
+- 文本类型的 <input> 和 <textarea> 元素会绑定 value property 并侦听 input 事件；
+- `<input type="checkbox">` 和 `<input type="radio">` 会绑定 checked property 并侦听 change 事件；
+- `<select>` 会绑定 value property 并侦听 change 事件。
 
 v-model指令可以添加一些修饰符：
 
-1. .lazy：`<input v-model.lazy="msg" />`，默认是监听input事件，即输入一个字符就会触发一次同步，现在会在change事件之后统一同步
-2. .number：`<input v-model.number="age" />`，将用户输入处理成数字，  
+- .lazy：`<input v-model.lazy="msg" />`，默认是监听input事件，即输入一个字符就会触发一次同步，现在会在change事件之后统一同步
+- .number：`<input v-model.number="age" />`，将用户输入处理成数字，  
    如果该值无法被 parseFloat() 处理，那么将返回原始值。  
    number 修饰符会在输入框有 type="number" 时自动启用。
-3. .trim：`<input v-model.trim="msg" />`，默认去除用户输入内容收尾的空格
+- .trim：`<input v-model.trim="msg" />`，默认去除用户输入内容收尾的空格
 
 ### 生命周期图示
 

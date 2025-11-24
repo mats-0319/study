@@ -23,10 +23,10 @@ install script: go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1
 
 ## Run Demo
 
-1. write proto file(s)
-2. generate grpc code(run powershell script)
-3. start server
-4. start client
+- write proto file(s)
+- generate grpc code(run powershell script)
+- start server
+- start client
 
 ## FAQ
 

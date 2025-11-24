@@ -1,4 +1,4 @@
-package uuid
+package utils
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 )
 
 func TestGenerateUUID(t *testing.T) {
-	for range [5]struct{}{} {
+	for range 5 {
 		fmt.Println(New())
 	}
 }
@@ -33,5 +33,6 @@ func TestGenerateUUIDByDesignatedText(t *testing.T) {
 			t.Logf("%s uid generate failed.\nget     : %s\nexpected: %s\n", text[i], uid, expectedUID)
 			t.Fail()
 		}
+		t.Log(text[i], uid, text[i] == uid)
 	}
 }
