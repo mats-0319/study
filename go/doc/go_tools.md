@@ -1,8 +1,9 @@
 # Go tools
 
-[reference](https://go.dev/doc/cmd)
+> [命令列表](https://go.dev/doc/cmd)提供有链接，直接指向各个命令最新版本的文档
 
-go提供了一套程序来构建和处理go代码，它们通常通过`go`命令调用，例如`go fmt`
+`go help`可以查看go命令列表  
+`go help <command>`可以查看一个命令的详细信息
 
 ## vet
 
@@ -16,9 +17,9 @@ vet不一定能找到所有的错误，所以不要依赖它判断程序正确�
 
 我的使用方式：`go vet -json ./... *> go_vet_report.txt`
 
-1. 使用json格式的错误报告，主要是因为默认格式下，如果没有检查到可疑结构，vet不会有任何输出，初学时容易误解成命令没有执行
-2. 写文件是一个好习惯
-3. 为什么使用`*>`？powershell在执行命令时，会报如下错误，所以使用`*>`将所有输出都重定向到文件
+- 使用json格式的错误报告，主要是因为默认格式下，如果没有检查到可疑结构，vet不会有任何输出，初学时容易误解成命令没有执行
+- 写文件是一个好习惯
+- 为什么使用`*>`？powershell在执行命令时，会报如下错误，所以使用`*>`将所有输出都重定向到文件
 
 ```txt 
 go : # github.com/mats9693/unnamed_plan/services/shared/const
@@ -68,10 +69,8 @@ flags:
 	Write cpu profile to the specified file.
 ```
 
--r的参数rule的格式：`pattern -> replacement`
-
 我的使用方式：`gofmt -w -s -l .`，修改源文件、简化代码、列举修改了哪些文件
 
 ## 问题
 
-1. `gofmt`和`go fmt`结果可能不一样，因为两边调的不是一个可执行文件
+- `gofmt`和`go fmt`结果可能不一样，因为两边调的不是一个可执行文件
