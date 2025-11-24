@@ -3,9 +3,9 @@ package api
 type UserIdentify int8
 
 const (
-	UserIdentify_Value0 UserIdentify = 0
-	UserIdentify_Second UserIdentify = 1
-	UserIdentify_Value2 UserIdentify = 2
+	UserIdentify_Second UserIdentify = 20
+	UserIdentify_Value0 UserIdentify = 10
+	UserIdentify_Value2 UserIdentify = 40
 )
 
 const URI_ListUser = "/user/list"

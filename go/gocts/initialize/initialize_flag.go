@@ -20,7 +20,9 @@ func writeDefaultConfigFile() {
 		log.Fatalln("json marshal failed, error: ", err)
 	}
 
-	utils.WriteFile(data.GeneratorIns.Config.GoDir+"config_default.json", content)
+	filename := "config.json"
+	backupGenerateFile(filename)
+	utils.WriteFile(data.GeneratorIns.Config.GoDir+filename, content)
 }
 
 func writeDefaultInitializerFile() {
@@ -29,5 +31,7 @@ func writeDefaultInitializerFile() {
 		log.Fatalln("json marshal failed, error: ", err)
 	}
 
-	utils.WriteFile(data.GeneratorIns.Config.GoDir+"init_default.json", content)
+	filename := "init.json"
+	backupGenerateFile(filename)
+	utils.WriteFile(data.GeneratorIns.Config.GoDir+filename, content)
 }

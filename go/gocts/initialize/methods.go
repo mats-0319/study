@@ -2,11 +2,7 @@ package initialize
 
 import (
 	"fmt"
-	"log"
-	"os"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/mats9693/study/go/gocts/data"
 	"github.com/mats9693/study/go/gocts/utils"
@@ -25,17 +21,9 @@ func (ins *GoAPIFile) writeFile(packageName string) {
 
 	ins.FileName = utils.MustSuffix(ins.FileName, ".go")
 
+	backupGenerateFile(ins.FileName)
+
 	filePath := data.GeneratorIns.Config.GoDir + ins.FileName
-
-	_, err := os.Stat(filePath)
-	if err == nil { // file exist, backup old file, for dev
-		backupPath := data.GeneratorIns.Config.GoDir + fmt.Sprintf("backup/%s-%d.txt",
-			strings.TrimSuffix(ins.FileName, ".go"), time.Now().Unix())
-		if err = os.Rename(filePath, backupPath); err != nil {
-			log.Fatalln("backup failed, error:", err)
-		}
-	}
-
 	utils.WriteFile(filePath, []byte(content))
 }
 
@@ -57,17 +45,17 @@ type {{ $apiName }}{{ $resSuffix }} struct {}
 }
 
 func (ins *EnumItem) toGo() string {
-	if ins.Number < 3 { // enum type usually larger than 2
-		ins.Number = 3
-	} else if ins.Number > 1<<7-1 {
+	if ins.Number > 1<<7-1 {
 		ins.Number = 1<<7 - 1
 	}
 
 	enumUnitsStr := ""
-	for i := range ins.Number {
-		enumUnitsStr += "\n{{ $indentation }}{{ $enumName }}_Value" + strconv.Itoa(i) + " {{ $enumName }} = " + strconv.Itoa(i)
+	if ins.Number > 0 {
+		enumUnitsStr = "\n"
 	}
-	enumUnitsStr += "\n"
+	for i := range ins.Number { // 'ins.Number' < 0 is ok
+		enumUnitsStr += fmt.Sprintf("{{ $indentation }}{{ $enumName }}_Value%d {{ $enumName }} = %d\n", i, i)
+	}
 
 	enumItemStr := `
 type {{ $enumName }} int8

@@ -25,25 +25,18 @@ type EnumItem struct {
 
 var DefaultInitializer = &Initializer{
 	PackageName: "api",
-	Files: []*GoAPIFile{
-		{
-			FileName: "demo",
-			APIList: []*APIItem{
-				{
-					Name: "ListUser",
-					URI:  "/user/list",
-				},
-				{
-					Name: "CreateUser",
-					URI:  "/user/create",
-				},
-			},
-			EnumList: []*EnumItem{
-				{
-					Name:   "UserIdentify",
-					Number: 3,
-				},
-			},
-		},
-	},
+	Files: []*GoAPIFile{{
+		FileName: "demo",
+		APIList: []*APIItem{{
+			Name: "ListUser",
+			URI:  "/user/list",
+		}, {
+			Name: "CreateUser",
+			URI:  "/user/create",
+		}},
+		EnumList: []*EnumItem{{
+			Name:   "UserIdentify",
+			Number: 3,
+		}},
+	}},
 }

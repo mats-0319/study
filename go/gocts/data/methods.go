@@ -26,7 +26,7 @@ func (ins *Generator) Initialize(configFile string) {
 	// set type maps
 	for _, typIns := range configIns.BasicGoType {
 		for _, goTyp := range typIns.GoType {
-			ins.TsType[goTyp] = typIns.TsType
+			ins.TsBasicType[goTyp] = typIns.TsType
 		}
 		ins.TsZeroValue[typIns.TsType] = typIns.TsZeroValue
 	}
@@ -52,7 +52,7 @@ func (c *GeneratorConfig) mustValid() {
 		c.TsDir = utils.MustSuffix(c.TsDir, "/")
 	}
 	utils.MustExistDir(c.GoDir)
-	utils.MustExistDir(c.GoDir + "backup/")
+	utils.MustExistDir(c.GoDir + utils.GoBackupFolderName + "/")
 	utils.EmptyDir(c.TsDir)
 
 	if len(c.BaseURL) < 1 {

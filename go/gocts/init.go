@@ -26,7 +26,7 @@ func init() {
 	flag.BoolVar(&version, "v", false, "show version")
 	flag.StringVar(&configFile, "c", "./go/config.json", "config file")
 	flag.BoolVar(&initializeFlag, "i", false, "initializeFlag basic files\n"+
-		"overwrite './go/config_default.json' and './go/init_default.json'")
+		"overwrite './go/config.json' and './go/init.json'")
 	flag.BoolVar(&generateGoFlag, "g", false, "generate go files from './go/init.json'\n")
 	flag.StringVar(&generateGoFrom, "genFrom", "", "generate go files from given file")
 
@@ -42,6 +42,7 @@ func init() {
 		os.Exit(0)
 	}
 
+	// init generator
 	data.GeneratorIns.Initialize(configFile)
 
 	if initializeFlag {

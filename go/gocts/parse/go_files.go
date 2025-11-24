@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/mats9693/study/go/gocts/data"
+	"github.com/mats9693/study/go/gocts/utils"
 )
 
 var (
@@ -65,7 +66,7 @@ func parseGoFile(filename string) {
 func matchRequests(filename string, fileBytes []byte) {
 	requestREMatched := RequestRE.FindAllSubmatch(fileBytes, -1)
 	for i := range requestREMatched {
-		// 没什么意义，因为匹配函数如果找到了匹配项，这里的长度就必然不小于3,但是因为后续要直接使用下标访问，所以还是判断一下
+		// 没什么意义，因为匹配函数如果找到了匹配项，这里的长度就必然不小于3,但是因为后续要直接使用下标访问，所以还是判断一下，下同
 		if len(requestREMatched[i]) < 3 {
 			continue
 		}
@@ -130,13 +131,18 @@ func matchEnums(filename string, fileBytes []byte) {
 		data.GeneratorIns.Structures[enumName] = &data.StructureItem{
 			FromFile: filename,
 			Typ:      &data.StructureType{IsEnum: true},
-			Fields:   matchEnumUnits(enumREMatched[i][2]),
+			Fields:   matchEnumUnits(enumName, enumREMatched[i][2]),
 		}
 	}
 }
 
-func matchEnumUnits(fileBytes []byte) []*data.StructureField {
-	enumUnitSlice := make([]*data.StructureField, 0)
+func matchEnumUnits(enumName string, fileBytes []byte) []*data.StructureField {
+	enumUnitSlice := []*data.StructureField{{
+		Name:        utils.EnumPlaceholder,
+		GoType:      enumName,
+		TSType:      enumName,
+		TSZeroValue: "-1",
+	}}
 
 	enumUnitREMatched := EnumUnitRE.FindAllSubmatch(fileBytes, -1)
 	for i := range enumUnitREMatched {
@@ -144,7 +150,7 @@ func matchEnumUnits(fileBytes []byte) []*data.StructureField {
 			continue
 		}
 
-		enumName := string(enumUnitREMatched[i][2])
+		enumName = string(enumUnitREMatched[i][2])
 		enumUnitIns := &data.StructureField{
 			Name:        strings.TrimPrefix(string(enumUnitREMatched[i][1]), enumName+"_"),
 			GoType:      enumName,
@@ -158,27 +164,31 @@ func matchEnumUnits(fileBytes []byte) []*data.StructureField {
 	return enumUnitSlice
 }
 
-// setTsTypeAndZeroValue set ts type and ts zero value for each go struct field
+// setTsTypeAndZeroValue set ts type and ts zero value for each field of go 'struct' typ
 func setTsTypeAndZeroValue() {
 	for i := range data.GeneratorIns.Structures {
 		if data.GeneratorIns.Structures[i].Typ.IsEnum {
-			continue
+			continue // ignore enum types, enum has set ts type and ts zero value when matched
 		}
 
 		for j, fieldIns := range data.GeneratorIns.Structures[i].Fields {
 			structureIns, ok := data.GeneratorIns.Structures[fieldIns.GoType]
 			if !ok { // basic type, in type map
-				tsType, _ := data.GeneratorIns.TsType[fieldIns.GoType]
-				tsZeroValue, _ := data.GeneratorIns.TsZeroValue[tsType]
-				data.GeneratorIns.Structures[i].Fields[j].TSType = tsType
+				tsBasicType, _ := data.GeneratorIns.TsBasicType[fieldIns.GoType]
+				tsZeroValue, _ := data.GeneratorIns.TsZeroValue[tsBasicType]
+				data.GeneratorIns.Structures[i].Fields[j].TSType = tsBasicType
 				data.GeneratorIns.Structures[i].Fields[j].TSZeroValue = tsZeroValue
-			} else { // not in map, consider as self-define type
+			} else { // self-define type
 				data.GeneratorIns.Structures[i].Fields[j].TSType = fieldIns.GoType
-				switch {
+				// 假设程序扫描到结构体S里的字段F，字段F的类型不是内置类型但具体定义还没扫描到，
+				// 也就是说没有办法判断字段F是结构体类型还是枚举类型，这会影响字段F的ts零值设置，
+				// 所以我们没有扫描到一个struct就设置一个struct的ts类型与零值，而是在全部扫描完成后统一设置
+				switch { // if struct field is struct type / enum type
 				case structureIns.Typ.IsStruct:
 					data.GeneratorIns.Structures[i].Fields[j].TSZeroValue = fmt.Sprintf("new %s()", fieldIns.GoType)
 				case structureIns.Typ.IsEnum:
-					data.GeneratorIns.Structures[i].Fields[j].TSZeroValue = "0"
+					data.GeneratorIns.Structures[i].Fields[j].TSZeroValue =
+						fmt.Sprintf("%s.%s", structureIns.Fields[0].TSType, utils.EnumPlaceholder)
 				}
 			}
 

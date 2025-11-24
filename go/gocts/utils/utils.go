@@ -9,15 +9,7 @@ import (
 
 // WriteFile write 'content' into 'file'
 func WriteFile(filename string, content []byte) {
-	file, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
-	if err != nil {
-		log.Fatalln("open file failed, error: ", err)
-	}
-	defer func() {
-		_ = file.Close()
-	}()
-
-	_, err = file.Write(content)
+	err := os.WriteFile(filename, content, 0777)
 	if err != nil {
 		log.Fatalln("write file failed, error: ", err)
 	}

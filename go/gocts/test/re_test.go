@@ -7,6 +7,12 @@ import (
 	"github.com/mats9693/study/go/gocts/parse"
 )
 
+func Test(t *testing.T) {
+	for i := range -3 {
+		print(i)
+	}
+}
+
 // 正则匹配结果的结构：
 // 三维数组：[][][]byte，其中最后的[]byte表示匹配到的字符数组
 // 而第一维表示匹配到的每一次（其长度表示总共匹配到多少次）

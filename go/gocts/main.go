@@ -13,7 +13,7 @@ func main() {
 
 	parse.TraversalDir()
 
-	generate_ts.GenerateConfig()
+	generate_ts.GenerateConfigFile()
 	generate_ts.GenerateRequestFiles()
 	generate_ts.GenerateStructureFiles()
 }

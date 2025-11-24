@@ -10,7 +10,7 @@
     - [x] doc
     - [x] encrypt transmission：加密传输，可以让两个人在不安全的通信信道上安全的传递信息
     - [x] generate avatar：生成像素风格对称图片，可用作默认头像
-    - [x] gocts：根据go语言定义的接口结构，生成http请求对应的ts相关代码
+    - [x] gocts：根据go语言定义的接口结构，生成相应的ts发送http请求的代码
     - [x] uuid：google uuid，新增**输入相同参数，输出相同id**功能
     - [x] totp：概念学习与go语言demo，android章节有完整的应用
     - [x] utils

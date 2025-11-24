@@ -9,8 +9,8 @@ type Generator struct {
 	Requests   map[string]string         // request name - request uri
 	Structures map[string]*StructureItem // structure name - structure item
 
-	TsType      map[string]string // go type - ts type
-	TsZeroValue map[string]string // ts type - ts zero value
+	TsBasicType map[string]string // go basic type - ts basic type
+	TsZeroValue map[string]string // ts basic type - ts zero value
 
 	IndentationStr string // indentation str
 }
@@ -21,7 +21,7 @@ var GeneratorIns = &Generator{
 	StructureAffiliation: make(map[string][]string),
 	Requests:             make(map[string]string),
 	Structures:           make(map[string]*StructureItem),
-	TsType:               make(map[string]string),
+	TsBasicType:          make(map[string]string),
 	TsZeroValue:          make(map[string]string),
 }
 
@@ -79,24 +79,20 @@ var DefaultGeneratorConfig = &GeneratorConfig{
 		GoType      []string `json:"go_type"`
 		TsType      string   `json:"ts_type"`
 		TsZeroValue string   `json:"ts_zero_value"`
-	}{
-		{
-			GoType:      []string{"string", "byte", "rune"},
-			TsType:      "string",
-			TsZeroValue: `""`,
-		},
-		{
-			GoType: []string{"int", "int8", "int16", "int32", "int64",
-				"uint", "uint8", "uint16", "uint32", "uint64",
-				"float32", "float64"},
-			TsType:      "number",
-			TsZeroValue: `0`,
-		},
-		{
-			GoType:      []string{"bool"},
-			TsType:      "boolean",
-			TsZeroValue: `false`,
-		},
-	},
+	}{{
+		GoType:      []string{"string", "byte", "rune"},
+		TsType:      "string",
+		TsZeroValue: `""`,
+	}, {
+		GoType: []string{"int", "int8", "int16", "int32", "int64",
+			"uint", "uint8", "uint16", "uint32", "uint64",
+			"float32", "float64"},
+		TsType:      "number",
+		TsZeroValue: `0`,
+	}, {
+		GoType:      []string{"bool"},
+		TsType:      "boolean",
+		TsZeroValue: `false`,
+	}},
 	Indentation: 4,
 }

@@ -44,6 +44,9 @@ func formatStructure(structureName string, externalStructures map[string][]strin
 
 func formatStruct(structureName string, structureItemIns *data.StructureItem, externalStructures map[string][]string) string {
 	fieldsStr := ""
+	if len(structureItemIns.Fields) > 0 {
+		fieldsStr = "\n"
+	}
 	for _, fieldIns := range structureItemIns.Fields {
 		field := "{{ $indentation }}{{ $fieldName }}: {{ $fieldType_Ts }} = {{ $fieldZeroValue_Ts }};\n"
 		field = strings.ReplaceAll(field, "{{ $fieldName }}", fieldIns.Name)
@@ -56,13 +59,8 @@ func formatStruct(structureName string, structureItemIns *data.StructureItem, ex
 			externalStructures[structureIns.FromFile] = append(externalStructures[structureIns.FromFile], fieldIns.TSType)
 		}
 	}
-	fieldsStr = strings.TrimSuffix(fieldsStr, "\n")
 
-	structStr := `
-export class {{ $structureName }} {
-{{ $structureFields }}
-}
-`
+	structStr := "\nexport class {{ $structureName }} {{{ $structureFields }}}\n"
 	structStr = strings.ReplaceAll(structStr, "{{ $structureName }}", structureName)
 	structStr = strings.ReplaceAll(structStr, "{{ $structureFields }}", fieldsStr)
 	structStr = strings.ReplaceAll(structStr, "{{ $indentation }}", data.GeneratorIns.IndentationStr)
@@ -79,13 +77,8 @@ func formatEnum(enumName string, enumItemIns *data.StructureItem) string {
 
 		enumUnitsStr += unit
 	}
-	enumUnitsStr = strings.TrimSuffix(enumUnitsStr, "\n")
 
-	enumStr := `
-export enum {{ $enumName }} {
-{{ $enumUnits }}
-}
-`
+	enumStr := "\nexport enum {{ $enumName }} {\n{{ $enumUnits }}}\n"
 	enumStr = strings.ReplaceAll(enumStr, "{{ $enumName }}", enumName)
 	enumStr = strings.ReplaceAll(enumStr, "{{ $enumUnits }}", enumUnitsStr)
 	enumStr = strings.ReplaceAll(enumStr, "{{ $indentation }}", data.GeneratorIns.IndentationStr)

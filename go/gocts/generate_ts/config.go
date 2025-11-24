@@ -8,7 +8,7 @@ import (
 	"github.com/mats9693/study/go/gocts/utils"
 )
 
-func GenerateConfig() {
+func GenerateConfigFile() {
 	content := utils.Copyright
 	content = append(content, formatConfigFile()...)
 

@@ -7,7 +7,7 @@ import { Pagination, ResBase } from "./common.go"
 
 export class ListUserReq {
     operator: string = "";
-    list_identify: UserIdentify = 0;
+    list_identify: UserIdentify = UserIdentify.placeholder;
     page: Pagination = new Pagination();
 }
 
@@ -17,16 +17,13 @@ export class ListUserRes {
     users: Array<string> = new Array<string>();
 }
 
-export class CreateUserReq {
+export class CreateUserReq {}
 
-}
-
-export class CreateUserRes {
-
-}
+export class CreateUserRes {}
 
 export enum UserIdentify {
-    Value0 = 0,
-    Second = 1,
-    Value2 = 2,
+    placeholder = -1,
+    Second = 20,
+    Value0 = 10,
+    Value2 = 40,
 }
