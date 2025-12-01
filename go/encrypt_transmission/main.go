@@ -13,13 +13,14 @@ import (
 const (
 	privateKeyFilePath         = "./priv.key"
 	publicKeyFilePath          = "./PUB.KEY"
-	plainTextFilePath          = "./message.txt"
-	plainTextDecryptedFilePath = "./message_decrypted.txt"
-	cipherTextFilePath         = "./CIPHER.TXT"
+	plainTextFileName          = "message"
+	cipherFileName             = "CIPHER"
+	plainTextDecryptedFileName = "message_decrypted"
+	defaultExtension           = ".txt"
 )
 
-//go:generate GOOS=linux   GOARCH=amd64 go build -o ./sample/transmission ./*.go
-//go:generate GOOS=windows GOARCH=amd64 go build -o ./sample/transmission.exe ./*.go
+//go:generate GOOS=linux   GOARCH=amd64 go build -o ./sample/transmission
+//go:generate GOOS=windows GOARCH=amd64 go build -o ./sample/transmission.exe
 func main() {
 	go start()
 
@@ -31,7 +32,7 @@ func start() {
 		log.Println("> Enter Your Command. ('h' for help)")
 		inputStr, err := bufio.NewReader(os.Stdin).ReadString('\n')
 		if err != nil {
-			log.Println("> Read input failed, error: ", err)
+			ExecLog("Read input", err)
 			continue
 		}
 
@@ -39,10 +40,10 @@ func start() {
 		switch matched {
 		case "h", "help":
 			printHelp()
-		case "i":
-			initialize()
 		case "g":
 			generateKeypair()
+		case "i":
+			initMessageFile()
 		case "e":
 			encrypt()
 		case "d":
@@ -55,26 +56,29 @@ func start() {
 	}
 }
 
-func initialize() {
-	err := os.WriteFile(plainTextFilePath, []byte("test plain text"), 0777)
+func initMessageFile() {
+	err := os.WriteFile(plainTextFileName+defaultExtension, []byte("test plain text"), 0777)
 	if err != nil {
-		log.Println("> Initialize message file failed, error: ", err)
+		ExecLog("Initialize message file", err)
 		return
 	}
 
-	log.Println("> Initialize message file success.")
+	ExecLog("Initialize message file")
 }
 
 func printHelp() {
-	log.Println("> Options:")
-	log.Println("  - h: this help")
-	log.Println(fmt.Sprintf("  - i: initialize message file ('%s')", plainTextFilePath))
-	log.Println(fmt.Sprintf("  - g: generate public & private key into files ('%s' & '%s')",
-		publicKeyFilePath, privateKeyFilePath))
-	log.Println(fmt.Sprintf("  - e: encrypt plain text from '%s' and output cipher text to '%s'",
-		plainTextFilePath, cipherTextFilePath))
-	log.Println(fmt.Sprintf("  - d: decrypt cipher text from '%s' and output plain text to '%s'",
-		cipherTextFilePath, plainTextDecryptedFilePath))
+	log.Print(`
+> Options:
+  - h: this help
+  - g: generate public & private key into files ('./priv.key' & './PUB.KEY')
+  - i: initialize message file './message.txt'
+  - e: encrypt plain text from './message.xxx' and write cipher to './CIPHER.XXX'
+  - d: decrypt cipher from './CIPHER.XXX' and write plain text to './message_decrypted.xxx'
+
+note: encrypt/decrypt support automatic recognize 'file extension', in fact, 
+when encrypt, we find first file which name matched 'message.[xxx]' and encrypt it into 'CIPHER.[XXX]';
+when decrypt, we find first file which name matched 'CIPHER.[XXX]' and decrypt it into 'message_decrypted.[xxx]'
+`)
 }
 
 func waitCtrlC() {
@@ -90,5 +94,6 @@ func waitCtrlC() {
 		break
 	}
 
+	fmt.Println()
 	log.Println("> Exit.")
 }

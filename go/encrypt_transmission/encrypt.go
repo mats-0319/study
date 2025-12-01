@@ -4,49 +4,69 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"crypto/x509"
-	"log"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/crypto/ecies"
 )
 
 func encrypt() {
+	pubKey, err := getPubKey()
+	if err != nil {
+		ExecLog("Get public key", err)
+		return
+	}
+
+	filePath, err := getFirstFile(plainTextFileName)
+	if err != nil {
+		ExecLog("Get first file", err)
+		return
+	}
+
+	// read plain text file
+	fileBytes, err := os.ReadFile(filePath)
+	if err != nil {
+		ExecLog("Read plain text file", err)
+		return
+	}
+
+	// encrypt file content
+	encryptedBytes, err := ecies.Encrypt(rand.Reader, pubKey, fileBytes, nil, nil)
+	if err != nil {
+		ExecLog("Encrypt", err)
+		return
+	}
+
+	// write cipher file
+	extension := strings.ToUpper(getExtension(filePath, plainTextFileName))
+	err = os.WriteFile(fmt.Sprintf("./%s%s", cipherFileName, extension), encryptedBytes, 0777)
+	if err != nil {
+		ExecLog("Write cipher file", err)
+		return
+	}
+
+	ExecLog("Encrypt")
+}
+
+func getPubKey() (*ecies.PublicKey, error) {
 	pubKeyBytes, err := os.ReadFile(publicKeyFilePath)
 	if err != nil {
-		log.Println("> Read public key failed, err: ", err)
-		return
+		ExecLog("Read public key", err)
+		return nil, err
 	}
 
 	pubKeyI, err := x509.ParsePKIXPublicKey(pubKeyBytes)
 	if err != nil {
-		log.Println("> Parse public key failed, err: ", err)
-		return
+		ExecLog("Parse public key", err)
+		return nil, err
 	}
 
 	pubKeyIns, ok := pubKeyI.(*ecdsa.PublicKey)
 	if !ok {
-		log.Println("> Parse public key failed, err: ", err)
-		return
-	}
-	pubKey := ecies.ImportECDSAPublic(pubKeyIns)
-
-	messageBytes, err := os.ReadFile(plainTextFilePath)
-	if err != nil {
-		log.Println("> Read plain text failed, err: ", err)
-		return
+		ExecLog("Public key type assert", err)
+		return nil, err
 	}
 
-	cipherBytes, err := ecies.Encrypt(rand.Reader, pubKey, messageBytes, nil, nil)
-	if err != nil {
-		log.Println("> Encrypt failed, err: ", err)
-		return
-	}
-
-	err = os.WriteFile(cipherTextFilePath, cipherBytes, 0777)
-	if err != nil {
-		log.Println("> Write cipher text failed, err: ", err)
-		return
-	}
-
-	log.Println("> Encrypt success.")
+	return ecies.ImportECDSAPublic(pubKeyIns), nil
 }

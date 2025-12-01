@@ -31,3 +31,20 @@
     - [x] 正则表达式学习笔记
     - [x] shell学习笔记
     - [x] travis-ci持续集成+codecov代码覆盖率使用记录
+
+## 为release计算hash
+
+如果一个项目的编译过程比较复杂，通常考虑将编译好的内容发布到release，而发布编译好的内容，又通常需要一个hash防伪。
+记录如何计算一个文件/文件夹的hash：
+
+- 计算文件hash：
+    - linux：`sha1sum [file name]`
+    - windows: `Get-FileHash -Path [file name] -Algorithm SHA1`
+- 计算文件夹hash：
+    - linux：`find [folder path] -type f -print0 | xargs -0 sha1sum | sha1sum`
+    - windows：`Get-ChildItem -Path [folder path] -File -Recurse | ForEach-Object { Get-FileHash $_.FullName 
+      -Algorithm SHA1 } | Sort-Object Path | ForEach-Object { $_.Hash } | Get-FileHash -Algorithm SHA1`
+    - windows也可以装一个git，然后使用linux的命令
+
+计算文件夹hash，它的过程是找到文件夹里的所有文件（排除文件夹、链接等），计算每个文件的hash，
+然后再对这些hash计算一次hash，得到的就是文件夹的hash

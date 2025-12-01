@@ -5,7 +5,6 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/x509"
-	"log"
 	"os"
 )
 
@@ -14,35 +13,35 @@ func generateKeypair() {
 	// generate private key
 	privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
-		log.Println("> Generate private key failed, error: ", err)
+		ExecLog("Generate private key", err)
 		return
 	}
 
 	// save private key
 	privKeyBytes, err := x509.MarshalECPrivateKey(privKey)
 	if err != nil {
-		log.Println("> Save private key failed, error: ", err)
+		ExecLog("Marshal private key", err)
 		return
 	}
 
 	err = os.WriteFile(privateKeyFilePath, privKeyBytes, 0777)
 	if err != nil {
-		log.Println("> Save private key failed, error: ", err)
+		ExecLog("Save private key", err)
 		return
 	}
 
 	// save public key
 	pubKeyBytes, err := x509.MarshalPKIXPublicKey(&privKey.PublicKey)
 	if err != nil {
-		log.Println("> Marshal public key failed, error: ", err)
+		ExecLog("Marshal public key", err)
 		return
 	}
 
 	err = os.WriteFile(publicKeyFilePath, pubKeyBytes, 0777)
 	if err != nil {
-		log.Println("> Save public key failed, error: ", err)
+		ExecLog("Save public key", err)
 		return
 	}
 
-	log.Println("> Generate key pair success.")
+	ExecLog("Generate key pair")
 }
