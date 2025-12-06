@@ -11,7 +11,7 @@ func GenerateStructureFiles() {
 	for filename := range data.GeneratorIns.StructureAffiliation {
 		content := utils.Copyright
 
-		externalStructures := make(map[string][]string)
+		externalStructures := make(map[string]*utils.Set)
 		structuresStr := ""
 		for _, structureName := range data.GeneratorIns.StructureAffiliation[filename] {
 			structuresStr += formatStructure(structureName, externalStructures)
@@ -28,7 +28,7 @@ func GenerateStructureFiles() {
 	}
 }
 
-func formatStructure(structureName string, externalStructures map[string][]string) string {
+func formatStructure(structureName string, externalStructures map[string]*utils.Set) string {
 	structureItemIns, _ := data.GeneratorIns.Structures[structureName]
 
 	structureStr := ""
@@ -42,7 +42,7 @@ func formatStructure(structureName string, externalStructures map[string][]strin
 	return structureStr
 }
 
-func formatStruct(structureName string, structureItemIns *data.StructureItem, externalStructures map[string][]string) string {
+func formatStruct(structureName string, structureItemIns *data.StructureItem, externalStructures map[string]*utils.Set) string {
 	fieldsStr := ""
 	if len(structureItemIns.Fields) > 0 {
 		fieldsStr = "\n"
@@ -56,7 +56,7 @@ func formatStruct(structureName string, structureItemIns *data.StructureItem, ex
 		fieldsStr += field
 
 		if structureIns, ok := data.GeneratorIns.Structures[fieldIns.GoType]; ok {
-			externalStructures[structureIns.FromFile] = append(externalStructures[structureIns.FromFile], fieldIns.TSType)
+			externalStructures[structureIns.FromFile] = externalStructures[structureIns.FromFile].Add(fieldIns.TSType)
 		}
 	}
 
@@ -87,7 +87,7 @@ func formatEnum(enumName string, enumItemIns *data.StructureItem) string {
 }
 
 // structures: from filename - structures' name
-func formatStructuresImport(externalStructures map[string][]string) string {
+func formatStructuresImport(externalStructures map[string]*utils.Set) string {
 	if len(externalStructures) < 1 {
 		return ""
 	}
@@ -95,7 +95,7 @@ func formatStructuresImport(externalStructures map[string][]string) string {
 	importStructuresStr := "\n"
 	for fromFile, structureNames := range externalStructures {
 		str := "import { {{ $structures }} } from \"./{{ $filename }}{{ $structureFileSuffix }}\"\n"
-		str = strings.ReplaceAll(str, "{{ $structures }}", strings.Join(structureNames, ", "))
+		str = strings.ReplaceAll(str, "{{ $structures }}", strings.Join(structureNames.Data, ", "))
 		str = strings.ReplaceAll(str, "{{ $filename }}", fromFile)
 
 		importStructuresStr += str

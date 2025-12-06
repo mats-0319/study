@@ -26,4 +26,6 @@ const URI_CreateUser = "/user/create"
 
 type CreateUserReq struct{}
 
-type CreateUserRes struct{}
+type CreateUserRes struct {
+	Res ResBase `json:"res"`
+}

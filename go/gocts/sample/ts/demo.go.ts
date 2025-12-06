@@ -19,7 +19,9 @@ export class ListUserRes {
 
 export class CreateUserReq {}
 
-export class CreateUserRes {}
+export class CreateUserRes {
+    res: ResBase = new ResBase();
+}
 
 export enum UserIdentify {
     placeholder = -1,

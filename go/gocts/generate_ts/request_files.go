@@ -31,7 +31,7 @@ class {{ $filename_Big }}Axios {
 export const {{ $filename }}Axios: {{ $filename_Big }}Axios = new {{ $filename_Big }}Axios()
 `
 
-	externalStructures := make(map[string][]string)
+	externalStructures := make(map[string]*utils.Set)
 	requestStr := formatHttpRequests(filename, externalStructures)
 
 	importStructuresStr := formatStructuresImport(externalStructures)
@@ -47,7 +47,7 @@ export const {{ $filename }}Axios: {{ $filename_Big }}Axios = new {{ $filename_B
 }
 
 // formatHttpRequests format http requests, also statistics external structures for declare their import statement
-func formatHttpRequests(filename string, externalStructures map[string][]string) string {
+func formatHttpRequests(filename string, externalStructures map[string]*utils.Set) string {
 	requestsStr := ""
 
 	for _, requestName := range data.GeneratorIns.RequestAffiliation[filename] {
@@ -62,10 +62,10 @@ func formatHttpRequests(filename string, externalStructures map[string][]string)
 		}
 
 		responseResName := requestName + data.GeneratorIns.Config.ResponseStructureSuffix
-		externalStructures[filename] = append(externalStructures[filename], responseResName)
+		externalStructures[filename] = externalStructures[filename].Add(responseResName)
 
 		if len(structureItemIns.Fields) > 0 { // 'xxxReq' has fields
-			externalStructures[filename] = append(externalStructures[filename], reqStructureName)
+			externalStructures[filename] = externalStructures[filename].Add(reqStructureName)
 		}
 
 		requestsStr += formatOneHttpRequest(requestName, structureItemIns, externalStructures)
@@ -75,7 +75,7 @@ func formatHttpRequests(filename string, externalStructures map[string][]string)
 }
 
 // formatOneHttpRequest
-func formatOneHttpRequest(requestName string, structureItemIns *data.StructureItem, externalStructures map[string][]string) string {
+func formatOneHttpRequest(requestName string, structureItemIns *data.StructureItem, externalStructures map[string]*utils.Set) string {
 	httpReqInvokeStr := `
 {{ $indentation }}public {{ $requestName_Small }}({{ $inputParams }}): Promise<AxiosResponse<{{ $requestName }}{{ $responseStructureSuffix }}>> {{{ $requestParam }}
 {{ $indentation }}{{ $indentation }}return axiosWrapper.post("{{ $requestURI }}"{{ $invokeParam }})
@@ -101,7 +101,7 @@ func formatOneHttpRequest(requestName string, structureItemIns *data.StructureIt
 
 			// record if structure field's type need import from another file
 			if structureIns, ok := data.GeneratorIns.Structures[structureField.GoType]; ok {
-				externalStructures[structureIns.FromFile] = append(externalStructures[structureIns.FromFile], structureField.TSType)
+				externalStructures[structureIns.FromFile] = externalStructures[structureIns.FromFile].Add(structureField.TSType)
 			}
 		}
 
