@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/mats9693/study/go/gocts/parse"
@@ -26,31 +25,31 @@ func TestRequestRE(t *testing.T) {
 
 	for i := range reRes {
 		for j := range reRes[i] {
-			fmt.Println("res", i, j, string(reRes[i][j]))
+			t.Log("res", i, j, string(reRes[i][j]))
 		}
 	}
 }
 
 func TestStructureRE(t *testing.T) {
 	//type Playlist struct {
-	//	ID          string  `json:"id" yaml:"id"`     // this is a comment
-	//	FileName    string  `json:"name" yaml:"name"` // this is another comment
-	//	Description string  `json:"description" yaml:"description"`
-	//	MusicList   []Music `json:"music_list" yaml:"music_list"`
+	//	ID          *string  `json:"id" yaml:"id"`     // this is a comment
+	//	FileName    string   `json:"name" yaml:"name"` // this is another comment
+	//	Description string   `json:"description" yaml:"description"`
+	//	MusicList   []*Music `json:"music_list" yaml:"music_list"`
 	//}
 
-	var str = []byte("type Playlist struct {\n\t\tID          string  `json:\"id\" yaml:\"id\"`     // this is a comment\n\t\tFileName    string  `json:\"name\" yaml:\"name\"` // this is another comment\n\t\tDescription string  `json:\"description\" yaml:\"description\"`\n\t\tMusicList   []Music `json:\"music_list\" yaml:\"music_list\"`\n\t}")
+	var str = []byte("type Playlist struct {\n\t\tID          *string  `json:\"id\" yaml:\"id\"`     // this is a comment\n\t\tFileName    string   `json:\"name\" yaml:\"name\"` // this is another comment\n\t\tDescription string   `json:\"description\" yaml:\"description\"`\n\t\tMusicList   []*Music `json:\"music_list\" yaml:\"music_list\"`\n\t}")
 
 	re := parse.StructRE
 	reRes := re.FindAllSubmatch(str, -1)
 
 	for i := range reRes {
 		for j := range reRes[i] {
-			fmt.Println("res", i, j, string(reRes[i][j]))
+			t.Log("res", i, j, string(reRes[i][j]))
 		}
 	}
 
-	fmt.Println("---")
+	t.Log("---")
 
 	for i := range reRes {
 		if len(reRes[i]) < 3 {
@@ -64,8 +63,9 @@ func TestStructureRE(t *testing.T) {
 
 	for i := range reRes {
 		for j := range reRes[i] {
-			fmt.Println("res", i, j, string(reRes[i][j]))
+			t.Log("res", i, j, string(reRes[i][j]))
 		}
+		t.Log()
 	}
 }
 
@@ -85,11 +85,11 @@ const (
 
 	for i := range reRes {
 		for j := range reRes[i] {
-			fmt.Println("res", i, j, string(reRes[i][j]))
+			t.Log("res", i, j, string(reRes[i][j]))
 		}
 	}
 
-	fmt.Println("---")
+	t.Log("---")
 
 	for i := range reRes {
 		if len(reRes[i]) < 4 {
@@ -103,7 +103,7 @@ const (
 
 	for i := range reRes {
 		for j := range reRes[i] {
-			fmt.Println("res", i, j, string(reRes[i][j]))
+			t.Log("res", i, j, string(reRes[i][j]))
 		}
 	}
 }

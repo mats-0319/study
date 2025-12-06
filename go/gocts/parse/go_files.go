@@ -16,7 +16,7 @@ import (
 var (
 	RequestRE     = regexp.MustCompile(`const\s+URI_(\w+)\s*=\s*"([\w/-]+)"`)
 	StructRE      = regexp.MustCompile(`type\s+(\w+)\s+struct\s*{([^}]*)}`)
-	StructFieldRE = regexp.MustCompile(`\w+\s+([\[\]\w]+)\s+.*?json:"(\w+)".*?\n`)
+	StructFieldRE = regexp.MustCompile(`\w+\s+([\[\]*\w]+)\s+.*?json:"(\w+)".*?\n`)
 	EnumRE        = regexp.MustCompile(`type\s+(\w+)\s*=?\s*\w+\s+const\s*\(([^)]*)\)`)
 	EnumUnitRE    = regexp.MustCompile(`(\w+)\s+(\w+)\s*=\s*(\w+)`)
 )
@@ -106,10 +106,15 @@ func matchStructFields(fields []byte) []*data.StructureField {
 			continue
 		}
 
+		typ := structureFieldREMatched[i][1]
+		isArray := bytes.HasPrefix(typ, []byte("[]"))
+		typ = bytes.TrimPrefix(typ, []byte("[]"))
+		typ = bytes.TrimPrefix(typ, []byte("*"))
+
 		fieldIns := &data.StructureField{
 			Name:    string(structureFieldREMatched[i][2]),
-			GoType:  string(bytes.TrimPrefix(structureFieldREMatched[i][1], []byte("[]"))),
-			IsArray: bytes.HasPrefix(structureFieldREMatched[i][1], []byte("[]")),
+			GoType:  string(typ),
+			IsArray: isArray,
 		}
 
 		fieldSlice = append(fieldSlice, fieldIns)
