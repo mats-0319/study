@@ -32,14 +32,14 @@ func TestRequestRE(t *testing.T) {
 }
 
 func TestStructureRE(t *testing.T) {
-	// type Playlist struct {
-	// 	 ID          string  `json:"id" yaml:"id"`
-	// 	 FileName        string  `json:"name" yaml:"name"`
-	// 	 Description string  `json:"description" yaml:"description"`
-	// 	 MusicList   []Music `json:"music_list" yaml:"music_list"`
-	// }
+	//type Playlist struct {
+	//	ID          string  `json:"id" yaml:"id"`     // this is a comment
+	//	FileName    string  `json:"name" yaml:"name"` // this is another comment
+	//	Description string  `json:"description" yaml:"description"`
+	//	MusicList   []Music `json:"music_list" yaml:"music_list"`
+	//}
 
-	var str = []byte("type Playlist struct {\n\tID          string  `json:\"id\" yaml:\"id\"`\n\tName        string  `json:\"name\" yaml:\"name\"`\n\tDescription string  `json:\"description\" yaml:\"description\"`\n\tMusicList   []Music `json:\"music_list\" yaml:\"music_list\"`\n}")
+	var str = []byte("type Playlist struct {\n\t\tID          string  `json:\"id\" yaml:\"id\"`     // this is a comment\n\t\tFileName    string  `json:\"name\" yaml:\"name\"` // this is another comment\n\t\tDescription string  `json:\"description\" yaml:\"description\"`\n\t\tMusicList   []Music `json:\"music_list\" yaml:\"music_list\"`\n\t}")
 
 	re := parse.StructRE
 	reRes := re.FindAllSubmatch(str, -1)

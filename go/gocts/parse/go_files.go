@@ -16,7 +16,7 @@ import (
 var (
 	RequestRE     = regexp.MustCompile(`const\s+URI_(\w+)\s*=\s*"([\w/-]+)"`)
 	StructRE      = regexp.MustCompile(`type\s+(\w+)\s+struct\s*{([^}]*)}`)
-	StructFieldRE = regexp.MustCompile(`\w+\s+([\[\]\w]+)\s+.*json:"(\w+)"`)
+	StructFieldRE = regexp.MustCompile(`\w+\s+([\[\]\w]+)\s+.*?json:"(\w+)".*?\n`)
 	EnumRE        = regexp.MustCompile(`type\s+(\w+)\s*=?\s*\w+\s+const\s*\(([^)]*)\)`)
 	EnumUnitRE    = regexp.MustCompile(`(\w+)\s+(\w+)\s*=\s*(\w+)`)
 )
