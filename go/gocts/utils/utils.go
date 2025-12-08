@@ -70,3 +70,39 @@ func MustSuffix(str string, suffix string) string {
 
 	return str
 }
+
+func BytesSplit(value []byte, sep ...byte) [][]byte {
+	if len(sep) < 1 {
+		return [][]byte{value}
+	}
+
+	res := make([][]byte, 0)
+	start := 0
+	index := start
+	for index < len(value) {
+		isSep := in(value[index], sep)
+
+		index++
+		if !isSep {
+			continue
+		}
+
+		res = append(res, value[start:index])
+		start = index + 1
+	}
+
+	return res
+}
+
+func in(value byte, list []byte) bool {
+	inFlag := false
+
+	for _, b := range list {
+		if b == value {
+			inFlag = true
+			break
+		}
+	}
+
+	return inFlag
+}

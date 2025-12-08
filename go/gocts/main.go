@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/mats9693/study/go/gocts/generate_ts"
+	gen "github.com/mats9693/study/go/gocts/generate_ts"
 	"github.com/mats9693/study/go/gocts/parse"
 )
 
@@ -13,7 +13,7 @@ func main() {
 
 	parse.TraversalDir()
 
-	generate_ts.GenerateConfigFile()
-	generate_ts.GenerateRequestFiles()
-	generate_ts.GenerateStructureFiles()
+	gen.GenerateConfigFile()
+	gen.GenerateRequestFiles()
+	gen.GenerateStructureFiles()
 }

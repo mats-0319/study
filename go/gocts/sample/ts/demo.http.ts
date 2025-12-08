@@ -5,8 +5,8 @@
 
 import { axiosWrapper } from "./config"
 import { AxiosResponse } from "axios"
-import { ListUserRes, ListUserReq, UserIdentify, CreateUserRes } from "./demo.go"
 import { Pagination } from "./common.go"
+import { ListUserRes, ListUserReq, UserIdentify, CreateUserRes } from "./demo.go"
 
 class DemoAxios {
     public listUser(operator: string, list_identify: UserIdentify, page: Pagination): Promise<AxiosResponse<ListUserRes>> {

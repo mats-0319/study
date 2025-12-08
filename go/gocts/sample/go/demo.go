@@ -17,7 +17,7 @@ type ListUserReq struct {
 }
 
 type ListUserRes struct {
-	Res     ResBase  `json:"res"`
+	ResBase `json:"res"`
 	Summary int64    `json:"summary"`
 	Users   []string `json:"users"`
 }
@@ -27,5 +27,5 @@ const URI_CreateUser = "/user/create"
 type CreateUserReq struct{}
 
 type CreateUserRes struct {
-	Res ResBase `json:"res"`
+	ResBase
 }

@@ -20,7 +20,8 @@ export class ListUserRes {
 export class CreateUserReq {}
 
 export class CreateUserRes {
-    res: ResBase = new ResBase();
+    is_success: boolean = false;
+    err: string = "";
 }
 
 export enum UserIdentify {

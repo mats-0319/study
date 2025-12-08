@@ -58,9 +58,10 @@ type StructureType struct {
 }
 
 type StructureField struct {
-	Name    string // field name, from json tag of go struct field
-	GoType  string
-	IsArray bool
+	Name       string // field name, from json tag of go struct field
+	GoType     string
+	IsArray    bool
+	IsEmbedded bool
 
 	TSType      string
 	TSZeroValue string

@@ -14,9 +14,9 @@ import (
 )
 
 var (
-	RequestRE     = regexp.MustCompile(`const\s+URI_(\w+)\s*=\s*"([\w/-]+)"`)
+	RequestRE     = regexp.MustCompile(`const\s+URI_(\w+)\s*=\s*["']([\w/-]+)["']`)
 	StructRE      = regexp.MustCompile(`type\s+(\w+)\s+struct\s*{([^}]*)}`)
-	StructFieldRE = regexp.MustCompile(`\w+\s+([\[\]*\w]+)\s+.*?json:"(\w+)".*?\n`)
+	StructFieldRE = regexp.MustCompile(`\s*(?:\w+\s+)?([\[\]*\w]+)(?:\s+.*?json:["'](\w+)["'].*?)?`)
 	EnumRE        = regexp.MustCompile(`type\s+(\w+)\s*=?\s*\w+\s+const\s*\(([^)]*)\)`)
 	EnumUnitRE    = regexp.MustCompile(`(\w+)\s+(\w+)\s*=\s*(\w+)`)
 )
@@ -24,7 +24,7 @@ var (
 func TraversalDir() {
 	entry, err := os.ReadDir(data.GeneratorIns.Config.GoDir)
 	if err != nil {
-		log.Fatalln("read dir failed, error: ", err)
+		log.Fatalln(fmt.Sprintf("read dir %s failed, error: %v", data.GeneratorIns.Config.GoDir, err))
 	}
 
 	for i := range entry {
@@ -64,57 +64,58 @@ func parseGoFile(filename string) {
 }
 
 func matchRequests(filename string, fileBytes []byte) {
-	requestREMatched := RequestRE.FindAllSubmatch(fileBytes, -1)
-	for i := range requestREMatched {
+	reMatched := RequestRE.FindAllSubmatch(fileBytes, -1)
+	for i := range reMatched {
 		// 没什么意义，因为匹配函数如果找到了匹配项，这里的长度就必然不小于3,但是因为后续要直接使用下标访问，所以还是判断一下，下同
-		if len(requestREMatched[i]) < 3 {
+		if len(reMatched[i]) < 3 {
 			continue
 		}
 
-		requestName := string(requestREMatched[i][1])
-		requestURI := string(requestREMatched[i][2])
+		requestName := string(reMatched[i][1])
 
 		data.GeneratorIns.RequestAffiliation[filename] = append(data.GeneratorIns.RequestAffiliation[filename], requestName)
-		data.GeneratorIns.Requests[requestName] = requestURI
+		data.GeneratorIns.Requests[requestName] = string(reMatched[i][2])
 	}
 }
 
 func matchStructs(filename string, fileBytes []byte) {
-	structureREMatched := StructRE.FindAllSubmatch(fileBytes, -1)
-	for i := range structureREMatched {
-		if len(structureREMatched[i]) < 3 {
+	reMatched := StructRE.FindAllSubmatch(fileBytes, -1)
+	for i := range reMatched {
+		if len(reMatched[i]) < 3 {
 			continue
 		}
 
-		structureName := string(structureREMatched[i][1])
+		structureName := string(reMatched[i][1])
 
 		data.GeneratorIns.StructureAffiliation[filename] = append(data.GeneratorIns.StructureAffiliation[filename], structureName)
 		data.GeneratorIns.Structures[structureName] = &data.StructureItem{
 			FromFile: filename,
 			Typ:      &data.StructureType{IsStruct: true},
-			Fields:   matchStructFields(structureREMatched[i][2]),
+			Fields:   matchStructFields(reMatched[i][2]),
 		}
 	}
 }
 
-func matchStructFields(fields []byte) []*data.StructureField {
+func matchStructFields(fieldBytes []byte) []*data.StructureField {
 	fieldSlice := make([]*data.StructureField, 0)
 
-	structureFieldREMatched := StructFieldRE.FindAllSubmatch(fields, -1)
-	for i := range structureFieldREMatched {
-		if len(structureFieldREMatched[i]) < 3 {
+	fieldSliceBytes := utils.BytesSplit(fieldBytes, '\n', ';')
+	for _, v := range fieldSliceBytes {
+		reMatched := StructFieldRE.FindSubmatch(v)
+		if len(reMatched) < 3 {
 			continue
 		}
 
-		typ := structureFieldREMatched[i][1]
+		typ := reMatched[1]
 		isArray := bytes.HasPrefix(typ, []byte("[]"))
 		typ = bytes.TrimPrefix(typ, []byte("[]"))
 		typ = bytes.TrimPrefix(typ, []byte("*"))
 
 		fieldIns := &data.StructureField{
-			Name:    string(structureFieldREMatched[i][2]),
-			GoType:  string(typ),
-			IsArray: isArray,
+			Name:       string(reMatched[2]),
+			GoType:     string(typ),
+			IsArray:    isArray,
+			IsEmbedded: len(reMatched[2]) < 1,
 		}
 
 		fieldSlice = append(fieldSlice, fieldIns)
@@ -124,19 +125,19 @@ func matchStructFields(fields []byte) []*data.StructureField {
 }
 
 func matchEnums(filename string, fileBytes []byte) {
-	enumREMatched := EnumRE.FindAllSubmatch(fileBytes, -1)
-	for i := range enumREMatched {
-		if len(enumREMatched[i]) < 3 {
+	reMatched := EnumRE.FindAllSubmatch(fileBytes, -1)
+	for i := range reMatched {
+		if len(reMatched[i]) < 3 {
 			continue
 		}
 
-		enumName := string(enumREMatched[i][1])
+		enumName := string(reMatched[i][1])
 
 		data.GeneratorIns.StructureAffiliation[filename] = append(data.GeneratorIns.StructureAffiliation[filename], enumName)
 		data.GeneratorIns.Structures[enumName] = &data.StructureItem{
 			FromFile: filename,
 			Typ:      &data.StructureType{IsEnum: true},
-			Fields:   matchEnumUnits(enumName, enumREMatched[i][2]),
+			Fields:   matchEnumUnits(enumName, reMatched[i][2]),
 		}
 	}
 }
@@ -149,18 +150,18 @@ func matchEnumUnits(enumName string, fileBytes []byte) []*data.StructureField {
 		TSZeroValue: "-1",
 	}}
 
-	enumUnitREMatched := EnumUnitRE.FindAllSubmatch(fileBytes, -1)
-	for i := range enumUnitREMatched {
-		if len(enumUnitREMatched[i]) < 4 {
+	reMatched := EnumUnitRE.FindAllSubmatch(fileBytes, -1)
+	for i := range reMatched {
+		if len(reMatched[i]) < 4 {
 			continue
 		}
 
-		enumName = string(enumUnitREMatched[i][2])
+		enumName = string(reMatched[i][2])
 		enumUnitIns := &data.StructureField{
-			Name:        strings.TrimPrefix(string(enumUnitREMatched[i][1]), enumName+"_"),
+			Name:        strings.TrimPrefix(string(reMatched[i][1]), enumName+"_"),
 			GoType:      enumName,
 			TSType:      enumName,
-			TSZeroValue: string(enumUnitREMatched[i][3]),
+			TSZeroValue: string(reMatched[i][3]),
 		}
 
 		enumUnitSlice = append(enumUnitSlice, enumUnitIns)
@@ -171,35 +172,45 @@ func matchEnumUnits(enumName string, fileBytes []byte) []*data.StructureField {
 
 // setTsTypeAndZeroValue set ts type and ts zero value for each field of go 'struct' typ
 func setTsTypeAndZeroValue() {
-	for i := range data.GeneratorIns.Structures {
-		if data.GeneratorIns.Structures[i].Typ.IsEnum {
+	for _, structureIns := range data.GeneratorIns.Structures {
+		if structureIns.Typ.IsEnum {
 			continue // ignore enum types, enum has set ts type and ts zero value when matched
 		}
 
-		for j, fieldIns := range data.GeneratorIns.Structures[i].Fields {
-			structureIns, ok := data.GeneratorIns.Structures[fieldIns.GoType]
+		for i := 0; i < len(structureIns.Fields); i++ {
+			fieldIns := structureIns.Fields[i]
+			targetStructure, ok := data.GeneratorIns.Structures[fieldIns.GoType]
+
+			if fieldIns.IsEmbedded {
+				// 如果一个字段既不具名、也不带有json tag，则将其视作嵌入式结构体，
+				// 移除该字段，将该字段所示嵌入式结构体的字段提高到与该字段同级
+				structureIns.Fields = append(structureIns.Fields[:i], structureIns.Fields[i+1:]...) // rm embedded structure
+				structureIns.Fields = append(structureIns.Fields, targetStructure.Fields...)        // add fields
+				i--
+				continue
+			}
+
 			if !ok { // basic type, in type map
 				tsBasicType, _ := data.GeneratorIns.TsBasicType[fieldIns.GoType]
 				tsZeroValue, _ := data.GeneratorIns.TsZeroValue[tsBasicType]
-				data.GeneratorIns.Structures[i].Fields[j].TSType = tsBasicType
-				data.GeneratorIns.Structures[i].Fields[j].TSZeroValue = tsZeroValue
+				fieldIns.TSType = tsBasicType
+				fieldIns.TSZeroValue = tsZeroValue
 			} else { // self-define type
-				data.GeneratorIns.Structures[i].Fields[j].TSType = fieldIns.GoType
+				fieldIns.TSType = fieldIns.GoType
 				// 假设程序扫描到结构体S里的字段F，字段F的类型不是内置类型但具体定义还没扫描到，
 				// 也就是说没有办法判断字段F是结构体类型还是枚举类型，这会影响字段F的ts零值设置，
 				// 所以我们没有扫描到一个struct就设置一个struct的ts类型与零值，而是在全部扫描完成后统一设置
 				switch { // if struct field is struct type / enum type
-				case structureIns.Typ.IsStruct:
-					data.GeneratorIns.Structures[i].Fields[j].TSZeroValue = fmt.Sprintf("new %s()", fieldIns.GoType)
-				case structureIns.Typ.IsEnum:
-					data.GeneratorIns.Structures[i].Fields[j].TSZeroValue =
-						fmt.Sprintf("%s.%s", structureIns.Fields[0].TSType, utils.EnumPlaceholder)
+				case targetStructure.Typ.IsStruct:
+					fieldIns.TSZeroValue = fmt.Sprintf("new %s()", fieldIns.GoType)
+				case targetStructure.Typ.IsEnum:
+					fieldIns.TSZeroValue = fmt.Sprintf("%s.%s", targetStructure.Fields[0].TSType, utils.EnumPlaceholder)
 				}
 			}
 
 			if fieldIns.IsArray {
-				data.GeneratorIns.Structures[i].Fields[j].TSType = fmt.Sprintf("Array<%s>", data.GeneratorIns.Structures[i].Fields[j].TSType)
-				data.GeneratorIns.Structures[i].Fields[j].TSZeroValue = fmt.Sprintf("new %s()", data.GeneratorIns.Structures[i].Fields[j].TSType)
+				fieldIns.TSType = fmt.Sprintf("Array<%s>", fieldIns.TSType)
+				fieldIns.TSZeroValue = fmt.Sprintf("new %s()", fieldIns.TSType)
 			}
 		}
 	}

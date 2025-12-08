@@ -23,9 +23,11 @@
 - sample: 使用示例
 - test: 测试
 - utils: 工具库
+- .run: goland运行配置，可以快速在sample路径构建并运行
 
 ## 约定
 
+- 所有用到的资源应全部在一个包内
 - 使用`const URI_[uri_name]=[uri_value]`结构定义接口uri
     - e.g. `const URI_ListUser = "/user/list"`
 - `type xxx struct {}`将被识别为自定义结构类型，其中结构体名称形如`xxxReq`/`xxxRes`者，

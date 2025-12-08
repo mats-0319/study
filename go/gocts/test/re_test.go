@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/mats9693/study/go/gocts/parse"
+	"github.com/mats9693/study/go/gocts/utils"
 )
 
 func Test(t *testing.T) {
@@ -31,14 +32,22 @@ func TestRequestRE(t *testing.T) {
 }
 
 func TestStructureRE(t *testing.T) {
-	//type Playlist struct {
-	//	ID          *string  `json:"id" yaml:"id"`     // this is a comment
-	//	FileName    string   `json:"name" yaml:"name"` // this is another comment
-	//	Description string   `json:"description" yaml:"description"`
-	//	MusicList   []*Music `json:"music_list" yaml:"music_list"`
-	//}
+	type ResBase struct {
+		IsSuccess bool   `json:"is_success"`
+		Err       string `json:"err"`
+	}
 
-	var str = []byte("type Playlist struct {\n\t\tID          *string  `json:\"id\" yaml:\"id\"`     // this is a comment\n\t\tFileName    string   `json:\"name\" yaml:\"name\"` // this is another comment\n\t\tDescription string   `json:\"description\" yaml:\"description\"`\n\t\tMusicList   []*Music `json:\"music_list\" yaml:\"music_list\"`\n\t}")
+	type User struct{}
+
+	type ListUserRes struct {
+		Res    *ResBase `json:"res"`              // this is a comment
+		Amount string   `json:'amount' yaml:"id"` // this is another comment
+		Users  []*User  `json:"users"`
+		*User  `json:"u"`
+		ResBase
+	}
+
+	var str = []byte("type ListUserRes struct {\n\t\tRes    *ResBase `json:\"res\"`              // this is a comment\n\t\tAmount string   `json:'amount' yaml:\"id\"` // this is another comment\n\t\tUsers  []*User  `json:\"users\"`\n\t\t*User  `json:\"u\"`\n\t\tResBase\n\t}")
 
 	re := parse.StructRE
 	reRes := re.FindAllSubmatch(str, -1)
@@ -51,21 +60,15 @@ func TestStructureRE(t *testing.T) {
 
 	t.Log("---")
 
-	for i := range reRes {
-		if len(reRes[i]) < 3 {
-			continue
-		}
+	fieldSlice := utils.BytesSplit(reRes[0][2], '\n', ';')
 
+	for i, v := range fieldSlice {
 		re = parse.StructFieldRE
-		reRes = re.FindAllSubmatch(reRes[i][2], -1)
-		break
-	}
+		r := re.FindSubmatch(v)
 
-	for i := range reRes {
-		for j := range reRes[i] {
-			t.Log("res", i, j, string(reRes[i][j]))
+		for j := range r {
+			t.Log("res", i, j, string(r[j]))
 		}
-		t.Log()
 	}
 }
 
