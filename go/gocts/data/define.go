@@ -70,7 +70,7 @@ type StructureField struct {
 var DefaultGeneratorConfig = &GeneratorConfig{
 	GoDir:                   "./go/",
 	TsDir:                   "./ts/",
-	BaseURL:                 "http://127.0.0.1:9693",
+	BaseURL:                 "http://127.0.0.1:10319/api",
 	Timeout:                 3_000,
 	RequestStructureSuffix:  "Req",
 	ResponseStructureSuffix: "Res",
@@ -94,6 +94,10 @@ var DefaultGeneratorConfig = &GeneratorConfig{
 		GoType:      []string{"bool"},
 		TsType:      "boolean",
 		TsZeroValue: `false`,
+	}, {
+		GoType:      []string{"any", "interface{}"},
+		TsType:      "Object",
+		TsZeroValue: `{}`,
 	}},
 	Indentation: 4,
 }

@@ -1,4 +1,4 @@
-package generate_ts
+package gen
 
 import (
 	"strings"

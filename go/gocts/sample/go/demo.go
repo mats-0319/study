@@ -11,15 +11,16 @@ const (
 const URI_ListUser = "/user/list"
 
 type ListUserReq struct {
-	Operator     string       `json:"operator"`
+	//Operator     string       `json:"operator"` // this is a comment
+	Operator     string       `json:"operator"` // this is a comment
 	ListIdentify UserIdentify `json:"list_identify"`
-	Page         Pagination   `json:"page"`
+	Pagination   `json:"page"`
 }
 
 type ListUserRes struct {
-	ResBase `json:"res"`
-	Summary int64    `json:"summary"`
-	Users   []string `json:"users"`
+	*ResBase
+	Summary int64 `json:"summary"`
+	Users   any   `json:"users"`
 }
 
 const URI_CreateUser = "/user/create"

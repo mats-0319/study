@@ -3,7 +3,7 @@
 // Code   : github.com/mats0319/study/go/gocts
 // Version: gocts v1.0.0
 
-import { Pagination, ResBase } from "./common.go"
+import { Pagination } from "./common.go"
 
 export class ListUserReq {
     operator: string = "";
@@ -12,9 +12,10 @@ export class ListUserReq {
 }
 
 export class ListUserRes {
-    res: ResBase = new ResBase();
     summary: number = 0;
-    users: Array<string> = new Array<string>();
+    users: Object = {};
+    is_success: boolean = false;
+    err: string = "";
 }
 
 export class CreateUserReq {}

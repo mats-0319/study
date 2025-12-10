@@ -71,18 +71,23 @@ func MustSuffix(str string, suffix string) string {
 	return str
 }
 
+// BytesSplit split 'value' into slice with 'sep(s)'
 func BytesSplit(value []byte, sep ...byte) [][]byte {
 	if len(sep) < 1 {
 		return [][]byte{value}
 	}
 
 	res := make([][]byte, 0)
-	start := 0
-	index := start
-	for index < len(value) {
-		isSep := in(value[index], sep)
+	for start, index := 0, 0; index < len(value); index++ {
+		if value[index] == '/' && index+1 < len(value) && value[index+1] == '/' { // skip comments ('// xxx')
+			res = append(res, value[start:index])
+			for ; !in(value[index], '\n'); index++ {
+			}
+			start = index
+		}
 
-		index++
+		isSep := in(value[index], sep...)
+
 		if !isSep {
 			continue
 		}
@@ -94,7 +99,7 @@ func BytesSplit(value []byte, sep ...byte) [][]byte {
 	return res
 }
 
-func in(value byte, list []byte) bool {
+func in(value byte, list ...byte) bool {
 	inFlag := false
 
 	for _, b := range list {

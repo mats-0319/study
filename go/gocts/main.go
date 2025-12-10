@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	gen "github.com/mats9693/study/go/gocts/generate_ts"
+	"github.com/mats9693/study/go/gocts/generate"
 	"github.com/mats9693/study/go/gocts/parse"
 )
 

@@ -9,3 +9,7 @@ type Pagination struct {
 	PageNum  int `json:"page_num"`
 	PageSize int `json:"page_size"`
 }
+
+type ResType interface {
+	string | ListUserRes | CreateUserRes
+}
