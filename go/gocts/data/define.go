@@ -47,8 +47,10 @@ type GeneratorConfig struct {
 }
 
 type StructureItem struct {
+	Name     string
 	FromFile string
 	Typ      *StructureType
+	Comment  string
 	Fields   []*StructureField
 }
 
@@ -62,6 +64,7 @@ type StructureField struct {
 	GoType     string
 	IsArray    bool
 	IsEmbedded bool
+	Comment    string
 
 	TSType      string
 	TSZeroValue string

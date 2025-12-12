@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -79,21 +80,18 @@ func BytesSplit(value []byte, sep ...byte) [][]byte {
 
 	res := make([][]byte, 0)
 	for start, index := 0, 0; index < len(value); index++ {
-		if value[index] == '/' && index+1 < len(value) && value[index+1] == '/' { // skip comments ('// xxx')
-			res = append(res, value[start:index])
-			for ; !in(value[index], '\n'); index++ {
-			}
-			start = index
-		}
-
 		isSep := in(value[index], sep...)
 
 		if !isSep {
 			continue
 		}
 
-		res = append(res, value[start:index])
+		item := bytes.TrimSpace(value[start:index])
 		start = index + 1
+
+		if len(item) > 0 && !bytes.HasPrefix(item, []byte("//")) { // 忽略只有空白字符的结果，忽略注释开头的结果
+			res = append(res, item)
+		}
 	}
 
 	return res

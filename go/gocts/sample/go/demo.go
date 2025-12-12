@@ -10,6 +10,8 @@ const (
 
 const URI_ListUser = "/user/list"
 
+// ListUserReq comment
+// some comment
 type ListUserReq struct {
 	//Operator     string       `json:"operator"` // this is a comment
 	Operator     string       `json:"operator"` // this is a comment

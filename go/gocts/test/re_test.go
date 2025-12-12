@@ -39,6 +39,8 @@ func TestStructureRE(t *testing.T) {
 
 	type User struct{}
 
+	// ListUserRes struct comment
+	// comment line 2
 	type ListUserRes struct {
 		Res    *ResBase `json:"res"`              // this is a comment
 		Amount string   `json:'amount' yaml:"id"` // this is another comment
@@ -47,7 +49,7 @@ func TestStructureRE(t *testing.T) {
 		ResBase
 	}
 
-	var str = []byte("type ListUserRes struct {\n\t\tRes    *ResBase `json:\"res\"`              // this is a comment\n\t\tAmount string   `json:'amount' yaml:\"id\"` // this is another comment\n\t\tUsers  []*User  `json:\"users\"`\n\t\t*User  `json:\"u\"`\n\t\tResBase\n\t}")
+	var str = []byte("// ListUserRes struct comment\n\t// comment line 2\n\ttype ListUserRes struct {\n\t\tRes    *ResBase `json:\"res\"`              // this is a comment\n\t\tAmount string   `json:'amount' yaml:\"id\"` // this is another comment\n\t\tUsers  []*User  `json:\"users\"`\n\t\t*User  `json:\"u\"`\n\t\tResBase\n\t}")
 
 	re := parse.StructRE
 	reRes := re.FindAllSubmatch(str, -1)
@@ -60,7 +62,7 @@ func TestStructureRE(t *testing.T) {
 
 	t.Log("---")
 
-	fieldSlice := utils.BytesSplit(reRes[0][2], '\n', ';')
+	fieldSlice := utils.BytesSplit(reRes[0][3], '\n', ';')
 
 	for i, v := range fieldSlice {
 		re = parse.StructFieldRE

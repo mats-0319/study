@@ -48,10 +48,15 @@ func formatStruct(structureName string, structureItemIns *data.StructureItem, ex
 		fieldsStr = "\n"
 	}
 	for _, fieldIns := range structureItemIns.Fields {
-		field := "{{ $indentation }}{{ $fieldName }}: {{ $fieldType_Ts }} = {{ $fieldZeroValue_Ts }};\n"
+		field := "{{ $indentation }}{{ $fieldName }}: {{ $fieldType_Ts }} = {{ $fieldZeroValue_Ts }};{{ $fieldComment }}\n"
 		field = strings.ReplaceAll(field, "{{ $fieldName }}", fieldIns.Name)
 		field = strings.ReplaceAll(field, "{{ $fieldType_Ts }}", fieldIns.TSType)
 		field = strings.ReplaceAll(field, "{{ $fieldZeroValue_Ts }}", fieldIns.TSZeroValue)
+		comment := ""
+		if len(fieldIns.Comment) > 0 {
+			comment = " " + fieldIns.Comment
+		}
+		field = strings.ReplaceAll(field, "{{ $fieldComment }}", comment)
 
 		fieldsStr += field
 
@@ -60,9 +65,10 @@ func formatStruct(structureName string, structureItemIns *data.StructureItem, ex
 		}
 	}
 
-	structStr := "\nexport class {{ $structureName }} {{{ $structureFields }}}\n"
-	structStr = strings.ReplaceAll(structStr, "{{ $structureName }}", structureName)
-	structStr = strings.ReplaceAll(structStr, "{{ $structureFields }}", fieldsStr)
+	structStr := "\n{{ $structComment }}export class {{ $structName }} {{{ $structFields }}}\n"
+	structStr = strings.ReplaceAll(structStr, "{{ $structComment }}", structureItemIns.Comment)
+	structStr = strings.ReplaceAll(structStr, "{{ $structName }}", structureName)
+	structStr = strings.ReplaceAll(structStr, "{{ $structFields }}", fieldsStr)
 	structStr = strings.ReplaceAll(structStr, "{{ $indentation }}", data.GeneratorIns.IndentationStr)
 
 	return structStr

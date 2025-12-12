@@ -28,3 +28,13 @@ func TestGenerateRandomBytes(t *testing.T) {
 	//b4dAz7JLxqgChukX7ooa
 	//bA8qe0CM7KMtf3LWvqIo
 }
+
+func TestGenerateRandomString(t *testing.T) {
+	for range 3 {
+		fmt.Println(GenerateRandomString(20))
+	}
+
+	//333dfd1117f5750a0091
+	//eeaf6f8d0768a912dc6a
+	//367b22de69e3972e6c5f
+}

@@ -9,24 +9,26 @@ import (
 )
 
 var (
-	StructRE      = regexp.MustCompile(`type\s+(\w+)\s+struct\s*{([^}]*)}`)
-	StructFieldRE = regexp.MustCompile(`\s*(?:\w+\s+)?([\[\]*\w]+)(?:\s+.*?json:["'](\w+)["'].*?)?`)
+	StructRE      = regexp.MustCompile(`((?://.*?\n)+)?\s*type\s+(\w+)\s+struct\s*{([^}]*)}`)
+	StructFieldRE = regexp.MustCompile(`\s*(?:\w+\s+)?([\[\]*\w]+)(?:\s+.*?json:["'](\w+)["'])?(?:.*?(//[^\n]+))?`)
 )
 
 func matchStructs(filename string, fileBytes []byte) {
 	reMatched := StructRE.FindAllSubmatch(fileBytes, -1)
 	for i := range reMatched {
-		if len(reMatched[i]) < 3 {
+		if len(reMatched[i]) < 4 {
 			continue
 		}
 
-		structureName := string(reMatched[i][1])
+		structureName := string(reMatched[i][2])
 
 		data.GeneratorIns.StructureAffiliation[filename] = append(data.GeneratorIns.StructureAffiliation[filename], structureName)
 		data.GeneratorIns.Structures[structureName] = &data.StructureItem{
+			Name:     structureName,
 			FromFile: filename,
 			Typ:      &data.StructureType{IsStruct: true},
-			Fields:   matchStructFields(reMatched[i][2]),
+			Comment:  string(reMatched[i][1]),
+			Fields:   matchStructFields(reMatched[i][3]),
 		}
 	}
 }
@@ -37,7 +39,7 @@ func matchStructFields(fieldBytes []byte) []*data.StructureField {
 	fieldSliceBytes := utils.BytesSplit(fieldBytes, '\n', ';')
 	for _, v := range fieldSliceBytes {
 		reMatched := StructFieldRE.FindSubmatch(v)
-		if len(reMatched) < 3 {
+		if len(reMatched) < 4 {
 			continue
 		}
 
@@ -51,6 +53,7 @@ func matchStructFields(fieldBytes []byte) []*data.StructureField {
 			GoType:     string(typ),
 			IsArray:    isArray,
 			IsEmbedded: len(reMatched[2]) < 1,
+			Comment:    string(reMatched[3]),
 		}
 
 		fieldSlice = append(fieldSlice, fieldIns)
