@@ -1,7 +1,6 @@
 package gen
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/mats9693/study/go/gocts/data"
@@ -20,13 +19,20 @@ func formatConfigFile() string {
 import axios, { AxiosInstance } from "axios";
 
 export const axiosWrapper: AxiosInstance = axios.create({
-{{ $indentation }}baseURL: "{{ $baseURL }}",
-{{ $indentation }}timeout: {{ $timeout }},
+{{ $indentation }}baseURL: import.meta.env.Vite_axios_base_url,
+{{ $indentation }}timeout: 3000,
 });
+
+// generate '.env.development' file in root path, 
+// with content 'Vite_axios_base_url = "http://127.0.0.1:10319/api"'
+//
+// generate '.env.production' file in root path,
+// with content 'Vite_axios_base_url = "https://xxx.xxx"'
+//
+// modify 'vite.config.ts', add config:
+// envPrefix: "Vite_"
 `
 	configStr = strings.ReplaceAll(configStr, "{{ $indentation }}", data.GeneratorIns.IndentationStr)
-	configStr = strings.ReplaceAll(configStr, "{{ $baseURL }}", data.GeneratorIns.Config.BaseURL)
-	configStr = strings.ReplaceAll(configStr, "{{ $timeout }}", strconv.Itoa(data.GeneratorIns.Config.Timeout))
 
 	return configStr
 }

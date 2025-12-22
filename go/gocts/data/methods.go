@@ -55,13 +55,6 @@ func (c *GeneratorConfig) mustValid() {
 	utils.MustExistDir(c.GoDir + utils.GoBackupFolderName + "/")
 	utils.EmptyDir(c.TsDir)
 
-	if len(c.BaseURL) < 1 {
-		c.BaseURL = DefaultGeneratorConfig.BaseURL
-	}
-	if c.Timeout < 1 {
-		c.Timeout = DefaultGeneratorConfig.Timeout
-	}
-
 	if len(c.RequestStructureSuffix) < 1 {
 		c.RequestStructureSuffix = DefaultGeneratorConfig.RequestStructureSuffix
 	}

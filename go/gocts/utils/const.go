@@ -4,7 +4,7 @@ var Copyright = []byte("// Generate File, Should Not Edit.\n" +
 	"// Author : mario. github.com/mats0319\n" +
 	"// Code   : github.com/mats0319/study/go/gocts\n" +
 	"// Version: " + Version + "\n")
-var Version = "gocts v0.2.0"
+var Version = "gocts v0.2.1"
 
 const (
 	GoBackupFolderName = "backup"

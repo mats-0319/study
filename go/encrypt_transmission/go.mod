@@ -1,6 +1,6 @@
 module github.com/mats9693/study/go/encrypt
 
-go 1.25.1
+go 1.25
 
 require github.com/ethereum/go-ethereum v1.13.15
 

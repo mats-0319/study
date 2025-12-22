@@ -29,9 +29,6 @@ type GeneratorConfig struct {
 	// work path
 	GoDir string `json:"go_dir"`
 	TsDir string `json:"ts_dir"`
-	// axios config
-	BaseURL string `json:"base_url"`
-	Timeout int    `json:"timeout"` // unit: micro-second
 	// naming conventions 命名规范/约定
 	RequestStructureSuffix  string `json:"request_structure_suffix"`
 	ResponseStructureSuffix string `json:"response_structure_suffix"`
@@ -73,8 +70,6 @@ type StructureField struct {
 var DefaultGeneratorConfig = &GeneratorConfig{
 	GoDir:                   "./go/",
 	TsDir:                   "./ts/",
-	BaseURL:                 "http://127.0.0.1:10319/api",
-	Timeout:                 3_000,
 	RequestStructureSuffix:  "Req",
 	ResponseStructureSuffix: "Res",
 	RequestFileSuffix:       ".http.ts",
