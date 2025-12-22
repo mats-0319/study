@@ -18,32 +18,57 @@ func WriteFile(filename string, content []byte) {
 	log.Println("Generated file: ", filename)
 }
 
-// MustSmall make sure first char of 'str' is small-case, e.g. "MustSmall" => "mustSmall"
+// MustSmall make 'str' to small-start camel case, e.g. "Must_small" => "mustSmall"
 func MustSmall(str string) string {
 	if len(str) < 1 {
 		return ""
 	}
 
-	bytes := []byte(str)
-	if 'A' < str[0] && str[0] < 'Z' {
-		bytes[0] = bytes[0] - 'A' + 'a'
+	str = camelCase(str)
+
+	strBytes := []byte(str)
+	if 'A' <= str[0] && str[0] <= 'Z' {
+		strBytes[0] = strBytes[0] - 'A' + 'a'
 	}
 
-	return string(bytes)
+	return string(strBytes)
 }
 
-// MustBig make sure first char of 'str' is big-case, e.g. "mustBig" => "MustBig"
+// MustBig make 'str' to big-start camel case, e.g. "must_big" => "MustBig"
 func MustBig(str string) string {
 	if len(str) < 1 {
 		return ""
 	}
 
-	bytes := []byte(str)
-	if 'a' < str[0] && str[0] < 'z' {
-		bytes[0] = bytes[0] - 'a' + 'A'
+	str = camelCase(str)
+
+	strBytes := []byte(str)
+	if 'a' <= str[0] && str[0] <= 'z' {
+		strBytes[0] = strBytes[0] - 'a' + 'A'
 	}
 
-	return string(bytes)
+	return string(strBytes)
+}
+
+func camelCase(str string) string {
+	strBytes := make([]byte, 0, len(str))
+	underlineFlag := false
+	for _, char := range str {
+		if char == '_' {
+			underlineFlag = true
+			continue
+		}
+
+		if underlineFlag && 'a' <= char && char <= 'z' {
+			strBytes = append(strBytes, byte(char-'a'+'A'))
+		} else {
+			strBytes = append(strBytes, byte(char))
+		}
+
+		underlineFlag = false
+	}
+
+	return string(strBytes)
 }
 
 func MustExistDir(dir string) {

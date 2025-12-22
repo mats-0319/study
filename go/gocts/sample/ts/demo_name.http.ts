@@ -5,10 +5,10 @@
 
 import { axiosWrapper } from "./config"
 import { AxiosResponse } from "axios"
-import { ListUserRes, ListUserReq, UserIdentify, CreateUserRes } from "./demo.go"
+import { ListUserRes, ListUserReq, UserIdentify, CreateUserRes } from "./demo_name.go"
 import { Pagination } from "./common.go"
 
-class DemoAxios {
+class DemoNameAxios {
     public listUser(operator: string, list_identify: UserIdentify, page: Pagination): Promise<AxiosResponse<ListUserRes>> {
         let req: ListUserReq = {
             operator: operator,
@@ -24,4 +24,4 @@ class DemoAxios {
     }
 }
 
-export const demoAxios: DemoAxios = new DemoAxios()
+export const demoNameAxios: DemoNameAxios = new DemoNameAxios()

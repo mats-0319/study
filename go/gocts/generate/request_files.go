@@ -28,7 +28,7 @@ class {{ $filename_Big }}Axios {
 {{ $requests }}
 }
 
-export const {{ $filename }}Axios: {{ $filename_Big }}Axios = new {{ $filename_Big }}Axios()
+export const {{ $filename_Small }}Axios: {{ $filename_Big }}Axios = new {{ $filename_Big }}Axios()
 `
 
 	externalStructures := make(map[string]*utils.Set)
@@ -38,7 +38,7 @@ export const {{ $filename }}Axios: {{ $filename_Big }}Axios = new {{ $filename_B
 	importStructuresStr = strings.TrimSpace(importStructuresStr)
 
 	requestFileStr = strings.ReplaceAll(requestFileStr, "{{ $importStructures }}", importStructuresStr)
-	requestFileStr = strings.ReplaceAll(requestFileStr, "{{ $filename }}", filename)
+	requestFileStr = strings.ReplaceAll(requestFileStr, "{{ $filename_Small }}", utils.MustSmall(filename))
 	requestFileStr = strings.ReplaceAll(requestFileStr, "{{ $filename_Big }}", utils.MustBig(filename))
 	requestFileStr = strings.ReplaceAll(requestFileStr, "{{ $requests }}", requestStr)
 	requestFileStr = strings.ReplaceAll(requestFileStr, "{{ $indentation }}", data.GeneratorIns.IndentationStr)
