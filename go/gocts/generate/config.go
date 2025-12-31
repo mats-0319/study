@@ -19,9 +19,17 @@ func formatConfigFile() string {
 import axios, { AxiosInstance } from "axios";
 
 export const axiosWrapper: AxiosInstance = axios.create({
-{{ $indentation }}baseURL: import.meta.env.Vite_axios_base_url,
-{{ $indentation }}timeout: 3000,
-});
+	baseURL: getBaseUrl(),
+	timeout: 3000
+})
+
+// getBaseUrl according to dev/product env & local ipv4 addr, set 'baseURL'
+function getBaseUrl(): string {
+	let url = import.meta.env.Vite_axios_base_url
+	let localIP = window.location.hostname
+
+	return import.meta.env.DEV ? url.replace("127.0.0.1", localIP) : url
+}
 
 // generate '.env.development' file in root path, 
 // with content 'Vite_axios_base_url = "http://127.0.0.1:10319/api"'

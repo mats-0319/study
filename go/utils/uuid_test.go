@@ -7,7 +7,7 @@ import (
 
 func TestGenerateUUID(t *testing.T) {
 	for range 5 {
-		fmt.Println(New[string]())
+		fmt.Println(New[string]("user server"))
 	}
 }
 
