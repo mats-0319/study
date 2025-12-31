@@ -1,0 +1,112 @@
+package gen
+
+import (
+	"strings"
+
+	"github.com/mats9693/study/go/gocts/data"
+	"github.com/mats9693/study/go/gocts/utils"
+)
+
+func GenerateStructureFiles() {
+	for filename := range data.GeneratorIns.StructureAffiliation {
+		content := utils.Copyright
+
+		externalStructures := make(map[string]*utils.Set)
+		structuresStr := ""
+		for _, structureName := range data.GeneratorIns.StructureAffiliation[filename] {
+			structuresStr += formatStructure(structureName, externalStructures)
+		}
+		delete(externalStructures, filename) // not import from current file
+
+		importStructuresStr := formatStructuresImport(externalStructures)
+
+		content = append(content, importStructuresStr...)
+		content = append(content, structuresStr...)
+
+		absolutePath := data.GeneratorIns.Config.TsDir + filename + data.GeneratorIns.Config.StructureFileSuffix
+		utils.WriteFile(absolutePath, content)
+	}
+}
+
+func formatStructure(structureName string, externalStructures map[string]*utils.Set) string {
+	structureItemIns, _ := data.GeneratorIns.Structures[structureName]
+
+	structureStr := ""
+	switch {
+	case structureItemIns.Typ.IsStruct:
+		structureStr = formatStruct(structureName, structureItemIns, externalStructures)
+	case structureItemIns.Typ.IsEnum:
+		structureStr = formatEnum(structureName, structureItemIns)
+	}
+
+	return structureStr
+}
+
+func formatStruct(structureName string, structureItemIns *data.StructureItem, externalStructures map[string]*utils.Set) string {
+	fieldsStr := ""
+	if len(structureItemIns.Fields) > 0 {
+		fieldsStr = "\n"
+	}
+	for _, fieldIns := range structureItemIns.Fields {
+		field := "{{ $indentation }}{{ $fieldName }}: {{ $fieldType_Ts }} = {{ $fieldZeroValue_Ts }};{{ $fieldComment }}\n"
+		field = strings.ReplaceAll(field, "{{ $fieldName }}", fieldIns.Name)
+		field = strings.ReplaceAll(field, "{{ $fieldType_Ts }}", fieldIns.TSType)
+		field = strings.ReplaceAll(field, "{{ $fieldZeroValue_Ts }}", fieldIns.TSZeroValue)
+		comment := ""
+		if len(fieldIns.Comment) > 0 {
+			comment = " " + fieldIns.Comment
+		}
+		field = strings.ReplaceAll(field, "{{ $fieldComment }}", comment)
+
+		fieldsStr += field
+
+		if structureIns, ok := data.GeneratorIns.Structures[fieldIns.GoType]; ok {
+			externalStructures[structureIns.FromFile] = externalStructures[structureIns.FromFile].Add(fieldIns.TSType)
+		}
+	}
+
+	structStr := "\n{{ $structComment }}export class {{ $structName }} {{{ $structFields }}}\n"
+	structStr = strings.ReplaceAll(structStr, "{{ $structComment }}", structureItemIns.Comment)
+	structStr = strings.ReplaceAll(structStr, "{{ $structName }}", structureName)
+	structStr = strings.ReplaceAll(structStr, "{{ $structFields }}", fieldsStr)
+	structStr = strings.ReplaceAll(structStr, "{{ $indentation }}", data.GeneratorIns.IndentationStr)
+
+	return structStr
+}
+
+func formatEnum(enumName string, enumItemIns *data.StructureItem) string {
+	enumUnitsStr := ""
+	for _, enumUnitIns := range enumItemIns.Fields {
+		unit := "{{ $indentation }}{{ $enumName }} = {{ $enumZeroValue_Ts }},\n"
+		unit = strings.ReplaceAll(unit, "{{ $enumName }}", enumUnitIns.Name)
+		unit = strings.ReplaceAll(unit, "{{ $enumZeroValue_Ts }}", enumUnitIns.TSZeroValue)
+
+		enumUnitsStr += unit
+	}
+
+	enumStr := "\nexport enum {{ $enumName }} {\n{{ $enumUnits }}}\n"
+	enumStr = strings.ReplaceAll(enumStr, "{{ $enumName }}", enumName)
+	enumStr = strings.ReplaceAll(enumStr, "{{ $enumUnits }}", enumUnitsStr)
+	enumStr = strings.ReplaceAll(enumStr, "{{ $indentation }}", data.GeneratorIns.IndentationStr)
+
+	return enumStr
+}
+
+// structures: from filename - structures' name
+func formatStructuresImport(externalStructures map[string]*utils.Set) string {
+	if len(externalStructures) < 1 {
+		return ""
+	}
+
+	importStructuresStr := "\n"
+	for fromFile, structureNames := range externalStructures {
+		str := "import { {{ $structures }} } from \"./{{ $filename }}{{ $structureFileSuffix }}\"\n"
+		str = strings.ReplaceAll(str, "{{ $structures }}", strings.Join(structureNames.Data, ", "))
+		str = strings.ReplaceAll(str, "{{ $filename }}", fromFile)
+
+		importStructuresStr += str
+	}
+	importStructuresStr = strings.ReplaceAll(importStructuresStr, "{{ $structureFileSuffix }}", strings.TrimSuffix(data.GeneratorIns.Config.StructureFileSuffix, ".ts"))
+
+	return importStructuresStr
+}

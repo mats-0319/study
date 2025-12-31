@@ -9,7 +9,7 @@
 
 ## 时间类型(`time.Duration`)
 
-```go 
+ 
 // A Duration represents the elapsed time between two instants
 // as an int64 nanosecond count. The representation limits the
 // largest representable duration to approximately 290 years.
@@ -21,7 +21,7 @@ go语言时间类型的单位是纳秒（1 sec = 1 * 10^9 nano sec），允许�
 
 ## 内置函数append的一个约束
 
-```go 
+```code 
 var nums1 []interface{}
 nums2 := []int{1, 3, 4}
 nums3 := append(nums1, nums2...)
@@ -44,7 +44,7 @@ fmt.Println(len(nums3))
 
 在go1.18版本以前，在函数字面量（闭包）内，变量作为左值出现，则视为该变量**已使用**
 
-```go 
+```code 
 var count int
 
 func () {
@@ -75,7 +75,7 @@ func () {
 
 ## type switch `case a, b:`
 
-```go 
+```code 
 type s struct {
     i int
 }

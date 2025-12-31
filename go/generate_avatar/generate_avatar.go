@@ -15,8 +15,8 @@ import (
 
 // GenerateAvatar generate avatar according to 'text'
 //
-//   @params text: use for calculate hash, distinguish 'A' and 'a'
-//   @params clarity: image clarity level, valid range is (0, 10]
+//	@params text: use for calculate hash, distinguish 'A' and 'a'
+//	@params clarity: image clarity level, valid range is (0, 10]
 func GenerateAvatar(text string, clarity int) error {
 	if !(0 < clarity && clarity <= 10) {
 		return errors.New("invalid clarity, required: (0, 10]")
@@ -32,8 +32,6 @@ func GenerateAvatar(text string, clarity int) error {
 		clarity:         clarity,
 		backgroundColor: color.RGBA{R: 255, G: 255, B: 255, A: 255}, // white
 	}
-
-
 
 	{
 		matrix := [5][3]bool{}

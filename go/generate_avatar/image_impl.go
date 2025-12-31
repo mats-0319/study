@@ -7,6 +7,8 @@ import (
 
 const basePX = 12
 
+var _ image.Image = (*image.RGBA)(nil)
+
 type imageImpl struct {
 	displayColor    [5][3]bool
 	color           color.RGBA

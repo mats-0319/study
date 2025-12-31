@@ -8,6 +8,7 @@ import (
 func TestGenerateAvatar(t *testing.T) {
 	testCase := []string{
 		"mario",
+		"Mario",
 		"mats9693",
 	}
 
