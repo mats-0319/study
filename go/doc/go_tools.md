@@ -15,24 +15,9 @@ vet不一定能找到所有的错误，所以不要依赖它判断程序正确�
 
 需要在go module目录执行：`go vet [path]`
 
-我的使用方式：`go vet -json ./... *> go_vet_report.txt`
+我的使用方式：`go vet -json ./...`
 
 - 使用json格式的错误报告，主要是因为默认格式下，如果没有检查到可疑结构，vet不会有任何输出，初学时容易误解成命令没有执行
-- 写文件是一个好习惯
-- 为什么使用`*>`？powershell在执行命令时，会报如下错误，所以使用`*>`将所有输出都重定向到文件
-
-```txt 
-go : # github.com/mats9693/unnamed_plan/services/shared/const
-所在位置 行:1 字符: 1
-+ go vet -json ./... *> a.txt
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (# github.com/ma...es/shared/const:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
-{}
-# github.com/mats9693/unnamed_plan/services/shared/http/response
-{}
-```
 
 ## fmt
 

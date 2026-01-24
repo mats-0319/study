@@ -6,7 +6,6 @@
     <package value="github.com/mats9693/study/go/gocts" />
     <directory value="$PROJECT_DIR$" />
     <filePath value="$PROJECT_DIR$/go/gocts/main.go" />
-    <output_directory value="$PROJECT_DIR$/go/gocts/sample" />
     <method v="2" />
   </configuration>
 </component>

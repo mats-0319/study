@@ -15,6 +15,9 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.
 SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
 
+上方JWT前两段的明文为：
+`{"alg":"HS256","typ":"JWT"}.{"sub":"1234567890","name":"John Doe","iat":1516239022}`
+
 - Header：base64url编码，通常包含算法（S部分的算法）、token类型等信息
 - Payload：base64url编码，包含想要传输的实际数据
 - Signature：使用H中的算法得到的签名，服务端信任payload的基础

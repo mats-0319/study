@@ -9,8 +9,8 @@
 查看手机cpu架构：（需要手机开启usb调试）
 `adb shell getprop | grep cpu`
 
-注：不要像flutter文档中提到的，直接使用`flutter install`，这会导致下载成flutter默认的演示项目，
-实际安装时应指明下载的软件包
+注：不要像flutter文档中提到的，直接使用`flutter install`，因为默认会下载`app-release.apk`，
+只有当你将所有架构的包都打在一起的时候（`build`不使用`--split-per-abi`参数），这样做才符合预期
 
 ## codelab
 
@@ -18,6 +18,8 @@ flutter文档中提供了一个codelab，完成之后对flutter编程有了一�
 
 - 在使用过程中大概了解了哪些Widget有长宽、padding/margin等字段可以设置
 - 用flutter写样式整体上比起使用html+css更容易
+    - 举个例子：html style会覆盖class。类似的还有很多，总的来说，当你写html的时候，很容易*写了居中但是没有居中*
+    - flutter把样式封装的更好，基本上可以做到所见即所得
 
 ## 技术点
 
