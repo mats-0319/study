@@ -80,14 +80,12 @@ v1.4.0-beta.2
 
 [reference](https://go.dev/doc/modules/version-numbers)
 
-## 解释
-
 - `1`：主(major)版本号
 - `4`：次要(minor)版本号
 - `0`：修补(patch)版本号
 - `beta.2`：预发布标识符(pre-release identifier)
 
-## 约定
+约定：
 
 - 主版本号变更，表示**向后不兼容的公共API更新**(backward-incompatible public API changes)，不保证兼容历史主版本
     - v0版本表示代码仍在开发中，不保证其稳定性和兼容性
@@ -108,8 +106,6 @@ v1.4.0-beta.2
 v0.0.0-20170915032832-14c0d48ead0c
 
 go工具会为没有tag的module（例如github的每个commit）生成一个伪版本号，专门用于go module
-
-## 解释
 
 两个横线将伪版本号分成三个部分
 

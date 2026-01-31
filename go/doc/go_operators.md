@@ -150,11 +150,11 @@ t = float64(x*y); r = t + z
 ## 转换(conversions)
 
 转换分为显式转换(explicit conversion，又称强制转换)和隐式转换(implied conversion)  
-强制类型转换表达式形如：`T(x)`，T类型在可能引起歧义的地方，可以用括号括起来，例如以*、<-开头的类型
+强制类型转换表达式形如：`T(x)`，T类型在可能引起歧义的地方，可以用括号括起来，例如`(*S)(nil)`
 
 强制类型转换规则`T(x)`：
 
-- x可分配(assignable)给T
+- x可赋值(assignable)给T
 - 结构体，忽略标签(tags)后，对应的字段有相同的底层类型或指针指向非已定义的类型(not defined types)且指针基础类型的底层类型相同
 - x的类型和T都是整型或浮点型
 - x的类型是整型、[]byte、[]rune，T是string类型

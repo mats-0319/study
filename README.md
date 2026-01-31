@@ -13,8 +13,7 @@
     - [x] totp：概念学习与go语言demo，android章节有完整的应用
     - [x] utils
     - [x] listen_bilibili：使用B站作为音源的听歌工具，[代码地址](https://github.com/mats0319/listen_bilibili)
-    - [x] unnamed_plan：微服务架构示例项目，与微服务相关的内容尽量全部手写、不调用第三方代码库，
-      [代码地址](https://github.com/mats0319/unnamed_plan)
+    - [x] unnamed_plan[代码地址](https://github.com/mats0319/unnamed_plan)
 - vue3
     - [x] vue doc：官方文档阅读笔记
     - [x] vue ecology：vue生态，包括但不限于pinia、vite config、ts编译选项、eslint、prettier

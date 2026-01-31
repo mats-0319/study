@@ -16,6 +16,3 @@
 .idea
 
 go.sum
-
-go/encrypt_transmission/sample/transmission
-go/encrypt_transmission/sample/transmission.exe

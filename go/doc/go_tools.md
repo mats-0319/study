@@ -5,6 +5,13 @@
 `go help`可以查看go命令列表  
 `go help <command>`可以查看一个命令的详细信息
 
+## Commands
+
+- go tool compile –S [main.go] >> [main.S] 生成main.go的go汇编，并保存在main.S文件中
+- go test -coverprofile=[coverage.txt] 执行当前目录下的测试文件，保存结果为coverage.txt
+- go tool cover -html=[coverage.txt] 生成网页形式的代码覆盖率报告
+- go build -gcflags -m [file name] 查看编译过程中，优化了哪些代码
+
 ## vet
 
 检查go代码，报告可疑结构(suspicious constructs)，例如参数与格式字符串不一致的printf调用
