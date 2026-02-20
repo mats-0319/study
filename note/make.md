@@ -1,10 +1,11 @@
-# makefile 学习笔记
+# make学习笔记
 
 > 不是系统性的学习make，仅针对我需要的内容
 
 [reference](https://www.ruanyifeng.com/blog/2015/02/make.html)
 
-编译(compile)：把代码变成可执行文件 构建(build)：先编译这个，还是先编译那个（即编译的安排）
+编译(compile)：把代码变成可执行文件  
+构建(build)：先编译这个，还是先编译那个（即编译的安排）
 
 make是一种构建工具，makefile则是make的构建规则（文件）
 
@@ -32,25 +33,25 @@ makefile文件由一系列规则(rules)构成，每条规则的格式如下：
 [tab]  <commands>
 ```
 
-1. target：构建目标，`make [target]`即表示执行target对应的脚本
-2. prerequisites：前置条件，可选
-3. commands：命令，需要以`tab`开头，可选
-4. 前置条件与命令不可同时为空
-5. 每条规则定义了一个操作，包含：操作名、操作的前置条件以及操作是如何执行的
+- target：构建目标，`make [target]`即表示执行target对应的脚本
+- prerequisites：前置条件，可选
+- commands：命令，需要以`tab`开头，可选
+- 前置条件与命令不可同时为空
+- 每条规则定义了一个操作，包含：操作名、操作的前置条件以及操作是如何执行的
 
 ### 目标(target)
 
 target一般是文件名，也可以是一个操作的名字：
 
-```makefile 
+``` makefile 
 clean:
      rm *.exe
 ```
 
-若当前目录存在名为`clean`的文件，则`make clean`不会执行任何操作，因为make因为`clean`文件已存在，  
+若当前目录存在名为`clean`的文件，则`make clean`不会执行任何操作，因为make认为`clean`文件已存在，  
 为了避免这种情况，可以显式定义`clean`为一种操作：
 
-```makefile 
+``` makefile 
 .phony: clean
 ```
 
@@ -65,10 +66,10 @@ clean:
 
 前置条件通常是一组文件名，之间用空格分隔，它规定了target什么时候需要重新构建：（满足以下任意一条，target需要重新构建）
 
-1. 任一前置文件不存在
-2. 任一前置文件有更新（前置文件的last-modification时间比target的时间戳新）
+- 任一前置文件不存在
+- 任一前置文件有更新（前置文件的last-modification时间比target的时间戳新）
 
-```makefile 
+``` makefile 
 result.txt: source.txt
     cp source.txt result.txt
     
@@ -78,8 +79,8 @@ source.txt:
 
 举个例子，上方代码中，连续调用两次`make result.txt`：
 
-1. 第一次会构建`source.txt`和`result.txt`文件
-2. 第二次因为`source.txt`存在且无更新，不会执行任何命令
+- 第一次会构建`source.txt`和`result.txt`文件
+- 第二次因为`source.txt`存在且无更新，不会执行任何命令
 
 ### 命令(commands)
 
@@ -97,7 +98,7 @@ source.txt:
 
 模式匹配：主要使用`%`，可以简化相同格式的重复构建写法
 
-```makefile 
+``` makefile 
 %.o: %.c
 ```
 
@@ -110,7 +111,7 @@ f2.o: f2.c
 
 自定义变量：通过等号定义变量，通过`$()`使用变量
 
-```makefile 
+``` makefile 
 txt = Hello World
 test:
     @echo $(txt)

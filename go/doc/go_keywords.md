@@ -200,7 +200,13 @@ goto语句需要一个标签，然后将控制转移到对应标签的位置，�
 
 ## import
 
-导入package
+`import mlog "github.com/mats0319/.../log"`
+
+- 导入外部代码包，导入的内容仅在当前文件有效
+- 可以通过包名访问包内的导出标识符，例如常量、变量、类型、函数、结构体导出字段和方法
+- 导入的包名可以任意修改，有两个特殊的例子：`_`、`.`
+    - `_`：仅执行该包的`init`函数，不导入任何标识符
+    - `.`：可以让你像使用当前包内标识符一样，使用该包的导出标识符
 
 ## interface
 
@@ -208,18 +214,32 @@ goto语句需要一个标签，然后将控制转移到对应标签的位置，�
 
 ## map
 
-map的`key`可以是任意类型，只要定义了`==`运算符
+map的`key`可以是任意类型，只要定义了判等运算符(`==`/`!=`)
 
 ## range
 
-可用于`for...range...`句式，遍历`array`、`slice`、`string`、`map`、`channel`类型
+可用于`for...range...`句式，遍历`array`、`slice`、`string`、`map`、`channel`、`整数`类型
 
-| type           | e.g.                    | 1st value | 2nd value |
-|----------------|-------------------------|-----------|-----------|
-| array or slice | [3]int *[3]int [ ]int   | index     | value     |
-| string         | string                  | index     | rune      |
-| map            | map[int]string          | key       | value     |
-| channel        | (chan int) (<-chan int) | value     |           |
+| type               | e.g.                    | 1st value | 2nd value |
+|--------------------|-------------------------|-----------|-----------|
+| array or slice     | [3]int *[3]int [ ]int   | index     | value     |
+| string             | string                  | index     | rune      |
+| map                | map[int]string          | key       | value     |
+| channel            | (chan int) (<-chan int) | value     |           |
+| integer            | 5                       | index     |           |
+| function, 0 values | func(func() bool)       |           |           |
+| function, 1 value  | func(func(V) bool)      | V         |           |
+| function, 2 values | func(func(K, V) bool)   | K         | V         |
+
+遍历map：
+
+- 顺序随机，且多次遍历顺序可能不同
+- 如果在一次遍历中删除一个尚未执行到的key，则本轮遍历不会执行该条目
+- 如果在一次遍历中新增一个k-v，则本轮遍历中可能会执行该条目，也可能不会
+
+遍历channel：不断读channel，直到channel关闭。如果读不到或channel为nil则阻塞
+
+遍历函数：实现类似python生成器的功能
 
 ## return
 
@@ -253,12 +273,12 @@ select语句执行过程：
     - 若存在可继续的通信（case），则通过统一的伪随机(uniform pseudo-random)选择一个
     - 若不存在可继续的通信（case），则选择default语句执行；若无default子句，则select语句阻塞，直到有一个case可以继续或死锁（全部goroutine阻塞）
 - 执行准备：
-    - 执行选中case子句的表达式（case到分号之间的部分）
+    - 执行选中case子句的表达式（case到冒号之间的部分，多是短变量声明或赋值）
     - 若选中default子句，直接进入下一步
 - 执行选中case的语句块
 
-以下代码包含**执行读写channel的case表达式，且副作用正常执行**、**随机选择一个case执行**以及**全部计算case表达式、只执行选中case的赋值
-**的演示，参考代码：
+以下代码包含**执行读写channel的case表达式，且副作用正常执行**、**随机选择一个case执行**以及
+**全部计算case表达式、只执行选中case的赋值**的演示，参考代码：
 
 ```code 
 func main() {
@@ -323,7 +343,7 @@ func addOne(slice []int, index int) int {
 - 把一连串`if-else`写成switch：`switch {case [expression]: // do sth}`
     - 要求`expression`值为`bool`类型
     - 第一个表达式值为`true`的`case`会被执行
-- 类型转换(type switch)
+- 类型转换(type switch)，要求t是any类型或类型参数（泛型）
     ```code 
     // from official doc
     var t interface{}

@@ -1,15 +1,8 @@
 # go小知识
 
-## Commands
-
-- go tool compile –S [main.go] >> [main.S] 生成main.go的go汇编，并保存在main.S文件中
-- go test -coverprofile=[coverage.txt] 执行当前目录下的测试文件，保存结果为coverage.txt
-- go tool cover -html=[coverage.txt] 生成网页形式的代码覆盖率报告
-- go build -gcflags -m [file name] 查看编译过程中，优化了哪些代码
-
 ## 时间类型(`time.Duration`)
 
- 
+``` 
 // A Duration represents the elapsed time between two instants
 // as an int64 nanosecond count. The representation limits the
 // largest representable duration to approximately 290 years.
@@ -68,10 +61,6 @@ func () {
 因为append在slice剩余容量足够的情况下，会修改到slice持有的底层数组，导致非预期的结果发生
 
 举例来说，`slice2 = append(slice1, item)`，看上去slice1没有作为左值出现，实际上slice1可能被修改
-
-参考资料：
-
-1. https://gist.github.com/mats9693/19a29266ebbef13ad2432124a8c4772c
 
 ## type switch `case a, b:`
 

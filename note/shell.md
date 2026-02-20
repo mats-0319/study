@@ -48,13 +48,13 @@ kill命令的含义是向进程发送信号，`-9`表示无条件退出，但由
 
 定义函数要在使用之前，输入参数不需要提现在函数定义上，如：
 
-```shell 
-function upgrade_service() {
-  cd ./"$1" || exit
-  chmod +x ./"$2"
-  (./"$2" &)
-  cd ..
-}
+``` shell
+    function upgrade_service() {
+      cd ./"$1" || exit
+      chmod +x ./"$2"
+      (./"$2" &)
+      cd ..
+    }
 
 upgrade_service "service_core" "unnamed_plan_service_core"
 ```

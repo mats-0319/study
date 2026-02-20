@@ -1,8 +1,11 @@
-# Github使用记录
+# Git/Github使用记录
 
 > 本文记录了笔者学习使用git和github的过程。  
 > 推荐一个git图文讲解+实际练习的[网站](https://learngitbranching.js.org/)  
 > [github地址](https://github.com/pcottle/learnGitBranching)
+
+我现在在日常开发中会使用github-desktop工具（linux版本的工具需要找代码库的管理员申请第三方应用权限）， 
+工具不支持的再考虑使用git命令行。（例如精简.git文件夹等）
 
 ### 基础的代码上传、下载操作
 

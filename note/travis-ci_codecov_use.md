@@ -61,19 +61,9 @@ travis-ci做了一次更新，将免费用户从[travis-ci.org](https://travis-c
 
 codecov的使用则是需要一个token，可以在github的代码仓库中设置，也可以放在持续集成脚本中。
 
-上面介绍了两个脚本的基本情况，并保证其可用([demo-leetcode](https://github.com/mats9693/leetcode)
-, [demo-utils](https://github.com/mats9693/utils))。
-
 ---
 
 ### summary
 
-以上是自己的repo使用travis-ci和codecov的方法；  
-对于组织的public repo，需要申请组织授权；  
+以上是自己的repo使用travis-ci和codecov的方法，对于组织的public repo，需要申请组织授权；  
 其中，travis-ci在授权之后，还需要使用管理员账号启动指定repo的持续集成，详情请参考travis-ci的权限问题。
-
----
-
-###### Mario
-
-I've been pretending to work hard, but you're really growing up.
