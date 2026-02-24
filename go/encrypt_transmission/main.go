@@ -19,8 +19,6 @@ const (
 	defaultExtension           = ".txt"
 )
 
-//go:generate GOOS=linux   GOARCH=amd64 go build -o ./sample/transmission
-//go:generate GOOS=windows GOARCH=amd64 go build -o ./sample/transmission.exe
 func main() {
 	go start()
 

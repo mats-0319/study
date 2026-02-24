@@ -1,3 +1,3 @@
-module github.com/mats9693/study/demo/server_sent_events
+module github.com/mats0319/study/demo/server_sent_events
 
 go 1.21

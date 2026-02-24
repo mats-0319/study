@@ -1,4 +1,4 @@
-module github.com/mats9693/study/demo/grpc
+module github.com/mats0319/study/demo/grpc
 
 go 1.21
 

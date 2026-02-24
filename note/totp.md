@@ -32,9 +32,52 @@ OTP -> HOTP -> TOTP
 ## 问题
 
 - 因为网络延迟、时钟偏移、用户延误等原因，有些服务器也接受使用上一个时间步长或下一个时间步长生成的密码
-- 实际上TOTP密码的有效期通常是2倍或更多，这是基于上一条提到的原因的妥协
 - TOTP没有限制重试次数，所以服务端程序需要处理用户多次失败的问题
-- 2的31次方转换成十进制数是21开头的10位数，也就是说现有算法只能计算不多于10位的密码，且计算10位密码时，首位不会出现5～9
+- 2的31次方转换成十进制数是21开头的10位数，即标准算法只能计算不多于10位的密码，且计算9/10位的密码时，最高位各数字出现概率不同
+
+## 代码示例-go
+
+``` go   
+func totp() {
+	keyBase32 := []byte("HFLEOZBUOVKXMVRY")
+	key := make([]byte, 32)
+	n, err := base32.StdEncoding.Decode(key, keyBase32)
+	if err != nil {
+		fmt.Println("decode base32 failed, error: ", n, err)
+		return
+	}
+	key = key[:n]
+
+	timestampSecond := time.Now().Unix()
+
+	// hmac-sha-1
+	hasher := hmac.New(sha1.New, key)
+	hasher.Write(itob(timestampSecond / 30))
+	hmacHash := hasher.Sum(nil)
+
+	// get an int32 from hash
+	offset := int(hmacHash[len(hmacHash)-1] & 0x0f)
+	// 算法要求屏蔽最高有效位
+	longPassword := int(hmacHash[offset]&0x7f)<<24 |
+		int(hmacHash[offset+1])<<16 |
+		int(hmacHash[offset+2])<<8 |
+		int(hmacHash[offset+3])
+
+	// get 6 digits
+	password := longPassword % int(math.Pow10(6))
+
+	fmt.Println(fmt.Sprintf("%06d", password))
+}
+
+func itob(integer int64) []byte {
+	byteArr := make([]byte, 8)
+	for i := 7; i >= 0; i-- {
+		byteArr[i] = byte(integer & 0xff)
+		integer = integer >> 8
+	}
+	return byteArr
+}
+```
 
 ## 参考资料
 

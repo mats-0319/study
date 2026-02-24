@@ -5,7 +5,7 @@ from_path=$(pwd) # record current path
 # change dir, for run this script from anywhere
 cd "$(dirname "$0")" || exit 1
 
-# clean history build data
+# clean history build folder
 if [ -d "./build/" ]; then
   rm -rf ./build/*
 fi
