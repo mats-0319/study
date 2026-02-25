@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="secure_transmission" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="study" />
+    <working_directory value="$PROJECT_DIR$/go/encrypt_transmission/sample" />
+    <kind value="PACKAGE" />
+    <package value="github.com/mats9693/study/go/encrypt" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/go/encrypt_transmission/main.go" />
+    <output_directory value="$PROJECT_DIR$/go/encrypt_transmission/sample" />
+    <method v="2" />
+  </configuration>
+</component>

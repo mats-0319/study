@@ -1,26 +1,29 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 )
 
-func ExecLog(behavior string, err ...error) {
+var emptyErr = errors.New("")
+
+func Log(behavior string, err ...error) {
 	if len(err) < 1 {
-		fmt.Println(fmt.Sprintf("> %s success.", behavior))
+		log.Println(fmt.Sprintf("> %s success.", behavior))
 	} else {
 		log.Println(fmt.Sprintf("> %s failed, error: %v", behavior, err[0]))
 	}
 }
 
 // getFirstFile return full file path matched 'fileName' without extension
-func getFirstFile(fileName string) (string, error) {
+func getFirstFile(fileName string) string {
 	entry, err := os.ReadDir("./")
 	if err != nil {
-		ExecLog("Read dir", err)
-		return "", err
+		Log("Read dir", err)
+		return ""
 	}
 
 	filePath := "./"
@@ -32,7 +35,7 @@ func getFirstFile(fileName string) (string, error) {
 		var fileInfo os.FileInfo
 		fileInfo, err = entry[i].Info()
 		if err != nil {
-			ExecLog("Read info", err)
+			Log("Read info", err)
 			continue
 		}
 
@@ -44,7 +47,7 @@ func getFirstFile(fileName string) (string, error) {
 		break
 	}
 
-	return filePath, nil
+	return filePath
 }
 
 func getExtension(filePath string, fileName string) string {

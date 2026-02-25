@@ -27,7 +27,7 @@ mkdir -p "./build"
 
     GOOS="$goos" GOARCH="$goarch" go build -o "$filePath"
 
-    sha1sum "$filePath" > "$filePath.sha1"
+    sha1sum "$filePath" | cut -d" " -f1 > "$filePath.sha1"
   }
 
 go mod tidy
