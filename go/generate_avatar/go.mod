@@ -1,3 +1,3 @@
-module github.com/mats9693/study/go/generate_avatar
+module github.com/mats0319/study/go/generate_avatar
 
-go 1.25
+go 1.26

@@ -1,5 +1,7 @@
 package utils
 
+import "slices"
+
 type Set struct {
 	Data []string
 }
@@ -11,15 +13,7 @@ func (s *Set) Add(value string) *Set {
 		}
 	}
 
-	isExist := false
-	for i := range s.Data {
-		if s.Data[i] == value {
-			isExist = true
-			break
-		}
-	}
-
-	if !isExist {
+	if !slices.Contains(s.Data, value) {
 		s.Data = append(s.Data, value)
 	}
 

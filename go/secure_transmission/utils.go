@@ -26,7 +26,8 @@ func getFirstFile(fileName string) string {
 		return ""
 	}
 
-	filePath := "./"
+	var filePath strings.Builder
+	filePath.WriteString("./")
 	for i := range entry {
 		if entry[i].IsDir() {
 			continue // ignore folder
@@ -43,11 +44,11 @@ func getFirstFile(fileName string) string {
 			continue // ignore files with wrong name
 		}
 
-		filePath += fileInfo.Name()
+		filePath.WriteString(fileInfo.Name())
 		break
 	}
 
-	return filePath
+	return filePath.String()
 }
 
 func getExtension(filePath string, fileName string) string {

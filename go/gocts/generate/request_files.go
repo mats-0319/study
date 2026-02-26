@@ -48,7 +48,7 @@ export const {{ $filename_Small }}Axios: {{ $filename_Big }}Axios = new {{ $file
 
 // formatHttpRequests format http requests, also statistics external structures for declare their import statement
 func formatHttpRequests(filename string, externalStructures map[string]*utils.Set) string {
-	requestsStr := ""
+	var requestsStr strings.Builder
 
 	for _, requestName := range data.GeneratorIns.RequestAffiliation[filename] {
 		structureItemIns := &data.StructureItem{}
@@ -68,10 +68,10 @@ func formatHttpRequests(filename string, externalStructures map[string]*utils.Se
 			externalStructures[filename] = externalStructures[filename].Add(reqStructureName)
 		}
 
-		requestsStr += formatOneHttpRequest(requestName, structureItemIns, externalStructures)
+		requestsStr.WriteString(formatOneHttpRequest(requestName, structureItemIns, externalStructures))
 	}
 
-	return strings.TrimSpace(requestsStr)
+	return strings.TrimSpace(requestsStr.String())
 }
 
 // formatOneHttpRequest

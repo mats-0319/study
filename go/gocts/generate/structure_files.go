@@ -12,16 +12,16 @@ func GenerateStructureFiles() {
 		content := utils.Copyright
 
 		externalStructures := make(map[string]*utils.Set)
-		structuresStr := ""
+		var structuresStr strings.Builder
 		for _, structureName := range data.GeneratorIns.StructureAffiliation[filename] {
-			structuresStr += formatStructure(structureName, externalStructures)
+			structuresStr.WriteString(formatStructure(structureName, externalStructures))
 		}
 		delete(externalStructures, filename) // not import from current file
 
 		importStructuresStr := formatStructuresImport(externalStructures)
 
 		content = append(content, importStructuresStr...)
-		content = append(content, structuresStr...)
+		content = append(content, structuresStr.String()...)
 
 		absolutePath := data.GeneratorIns.Config.TsDir + filename + data.GeneratorIns.Config.StructureFileSuffix
 		utils.WriteFile(absolutePath, content)
@@ -75,18 +75,18 @@ func formatStruct(structureName string, structureItemIns *data.StructureItem, ex
 }
 
 func formatEnum(enumName string, enumItemIns *data.StructureItem) string {
-	enumUnitsStr := ""
+	var enumUnitsStr strings.Builder
 	for _, enumUnitIns := range enumItemIns.Fields {
 		unit := "{{ $indentation }}{{ $enumName }} = {{ $enumZeroValue_Ts }},\n"
 		unit = strings.ReplaceAll(unit, "{{ $enumName }}", enumUnitIns.Name)
 		unit = strings.ReplaceAll(unit, "{{ $enumZeroValue_Ts }}", enumUnitIns.TSZeroValue)
 
-		enumUnitsStr += unit
+		enumUnitsStr.WriteString(unit)
 	}
 
 	enumStr := "\nexport enum {{ $enumName }} {\n{{ $enumUnits }}}\n"
 	enumStr = strings.ReplaceAll(enumStr, "{{ $enumName }}", enumName)
-	enumStr = strings.ReplaceAll(enumStr, "{{ $enumUnits }}", enumUnitsStr)
+	enumStr = strings.ReplaceAll(enumStr, "{{ $enumUnits }}", enumUnitsStr.String())
 	enumStr = strings.ReplaceAll(enumStr, "{{ $indentation }}", data.GeneratorIns.IndentationStr)
 
 	return enumStr

@@ -9,14 +9,15 @@ import (
 )
 
 func (ins *GoAPIFile) writeFile(packageName string) {
-	content := fmt.Sprintf("package %s\n", packageName)
+	var content strings.Builder
+	content.WriteString(fmt.Sprintf("package %s\n", packageName))
 
 	for i := range ins.EnumList {
-		content += ins.EnumList[i].toGo()
+		content.WriteString(ins.EnumList[i].toGo())
 	}
 
 	for i := range ins.APIList {
-		content += ins.APIList[i].toGo()
+		content.WriteString(ins.APIList[i].toGo())
 	}
 
 	ins.FileName = utils.MustSuffix(ins.FileName, ".go")
@@ -24,7 +25,7 @@ func (ins *GoAPIFile) writeFile(packageName string) {
 	backupGenerateFile(ins.FileName)
 
 	filePath := data.GeneratorIns.Config.GoDir + ins.FileName
-	utils.WriteFile(filePath, []byte(content))
+	utils.WriteFile(filePath, content.String())
 }
 
 func (ins *APIItem) toGo() string {
