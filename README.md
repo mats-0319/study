@@ -2,9 +2,6 @@
 
 ## 目录
 
-- demo：用于技术验证，一般不会直接调用
-    - [x] server-sent event
-    - [x] grpc
 - go
     - [x] doc
     - [x] encrypt transmission：加密传输，可以让两个人在不安全的通信信道上安全的传递信息
@@ -26,9 +23,10 @@
     - [x] git/github使用记录
     - [x] JWT学习笔记
     - [x] make学习笔记
+    - [x] markdown学习笔记
     - [x] 正则表达式学习笔记
     - [x] shell学习笔记
-    - [x] travis-ci持续集成+codecov代码覆盖率使用记录
+    - [x] totp学习笔记
 
 ## 为release计算hash
 
@@ -75,7 +73,7 @@
 - lc也重建吧，看看生成工具能不能改一改继续用
 - up也准备重建
 - study-note准备放到同名仓库
-    - 同名仓库结构：readme介绍全部仓库基本情况，同时包含笔记、公共脚本等
+    - 同名仓库结构：readme介绍全部仓库基本情况，同时包含笔记、公共脚本等归档内容
 - study-编程语言/demo/gocts：保持原样
 - study-go-et：单独成库，维护release
 - 算法导论代码实现：先放在study，后续考虑单独成库

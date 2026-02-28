@@ -105,8 +105,9 @@ export function getLocalIP(): string {
 ### 配置允许本机和手机访问
 
 使用本机内网ip：
+
 - server.host使用本机内网ip（获取ip函数见上一节）
-- （如果有后端）后端的ip地址使用`window.location.hostname`
+- 检查请求目标地址（通常在`.env.development`文件）
 
 ## ts编译选项
 

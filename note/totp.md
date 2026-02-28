@@ -10,24 +10,28 @@ Time-based One-Time Password
 > 括号内为通常的默认参数
 
 - 生成密钥K，服务端与客户端共享
-- 记录协商时间T0（0）和时间步长TI（30秒）
-- 协商加密hash算法（HMAC-SHA-1）
+- 协商起始时间T0（0）和时间步长TI（30秒）
+- 协商密码生成算法（HMAC-SHA-1）
 - 协商密码长度（6位）
 
-## 对比
+## 生成密码
+
+> 介绍如何计算一次性密码
 
 OTP -> HOTP -> TOTP
 
 几种算法的区别在于hash函数的原文，OTP的hash原文是随机的、HOTP使用计数器、TOTP使用时间步数
 
-## 生成密码
+- OTP(K,C) = Truncate(Hash(K,C))
+    - Truncate: 截取算法，将hash结果转变成一串数字
+    - hash algorithm: hmac-sha-1
+    - C: 随机数
 
-> 示例代码：`./demo.go`，dart代码见`github.com/mats0319/totp/lib/dart/totp.dart`
+截取算法：
 
-- OTP(K,C) = Truncate(HMAC-SHA-1(K,C)) -> C是随机数，T是截取函数
-- step 1：sha-1得到20 Bytes，取最后一个Byte的后4 bits作为起始索引（起始索引属于0～15）
-- step 2：从起始索引开始，往后获取总计4个Bytes，将其后31 bits转换为十进制数字作为随机长密码
-- step 3：根据需要的位数d，取长密码的后d位，长度不足的在高位补0
+1. sha-1得到20 Bytes，取最后一个Byte的后4 bits作为起始索引（起始索引属于0～15）
+2. 从起始索引开始，往后获取总计4个Bytes，将其后31 bits转换为十进制数字作为随机长密码（舍弃最高位）
+3. 根据需要的位数d，取长密码的后d位，长度不足的在高位补0
 
 ## 问题
 
@@ -35,7 +39,9 @@ OTP -> HOTP -> TOTP
 - TOTP没有限制重试次数，所以服务端程序需要处理用户多次失败的问题
 - 2的31次方转换成十进制数是21开头的10位数，即标准算法只能计算不多于10位的密码，且计算9/10位的密码时，最高位各数字出现概率不同
 
-## 代码示例-go
+## 代码示例
+
+go
 
 ``` go   
 func totp() {
@@ -76,6 +82,50 @@ func itob(integer int64) []byte {
 		integer = integer >> 8
 	}
 	return byteArr
+}
+```
+
+dart
+
+```dart
+const int _timeInterval = 30;
+const int _pwdLength = 6;
+
+(String, double) generateTOTP(String keyBase32) {
+  try {
+    final Uint8List keyBytes = base32.decode(keyBase32.toUpperCase());
+
+    final int timestampSecond = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    final int timeRemain = _timeInterval - timestampSecond % _timeInterval;
+    final int timeCount = timestampSecond ~/ _timeInterval;
+    final Uint8List timeCountBytes = _int2Bytes(timeCount);
+
+    final List<int> hash = Hmac(sha1, keyBytes).convert(timeCountBytes).bytes;
+
+    final int offset = hash.last & 0xf; // 0b 0000 1111
+    final int longPassword =
+        (hash[offset] & 0x7f) << 24 | // 0b 0111 1111
+        hash[offset + 1] << 16 |
+        hash[offset + 2] << 8 |
+        hash[offset + 3];
+
+    final int totp = longPassword % pow(10, _pwdLength).toInt();
+
+    return (totp.toString().padLeft(_pwdLength, "0"), timeRemain.toDouble());
+  } catch (e) {
+    return ("计算密码失败", _timeInterval.toDouble());
+  }
+}
+
+Uint8List _int2Bytes(int long) {
+  final byteArray = Uint8List(8);
+
+  for (var index = byteArray.length - 1; index >= 0; index--) {
+    byteArray[index] = long & 0xff;
+    long >>= 8;
+  }
+
+  return byteArray;
 }
 ```
 
