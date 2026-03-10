@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestGenerateRandomIntSlice(t *testing.T) {
+func TestGenerateRandomSlice(t *testing.T) {
 	for range 3 {
 		fmt.Println(GenerateRandomSlice[int](10, 10))
 		fmt.Println(GenerateRandomSlice[float64](10, 10.0))
@@ -19,9 +19,9 @@ func TestGenerateRandomIntSlice(t *testing.T) {
 	// [6.961 2.952 -7.435 9.487 5.468 -0.123 -4.897 8.305 4.765 -6.441]
 }
 
-func TestGenerateRandomBytes(t *testing.T) {
+func TestGenerateRandomBytes_CharacterLibraryIndex(t *testing.T) {
 	for range 3 {
-		fmt.Println(string(GenerateRandomBytes(20)))
+		fmt.Println(string(GenerateRandomBytes_CharacterLibraryIndex(20)))
 	}
 
 	//kTGIilO7A3j8OMqPV7lp
@@ -29,9 +29,9 @@ func TestGenerateRandomBytes(t *testing.T) {
 	//bA8qe0CM7KMtf3LWvqIo
 }
 
-func TestGenerateRandomString(t *testing.T) {
+func TestGenerateRandomBytes_BytesEncode(t *testing.T) {
 	for range 3 {
-		fmt.Println(GenerateRandomString(20))
+		fmt.Println(GenerateRandomBytes_BytesEncode(20))
 	}
 
 	//333dfd1117f5750a0091

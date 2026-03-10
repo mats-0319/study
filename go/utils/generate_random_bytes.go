@@ -1,12 +1,16 @@
 package utils
 
-import "math/rand/v2"
+import (
+	crand "crypto/rand"
+	"encoding/hex"
+	"math/rand/v2"
+)
 
 const CharactersLibrary = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const useBits = 6 // 6个bit位可以表示全部字符库中的字符
 
-// GenerateRandomBytes generate random 'length' readable Bytes
-func GenerateRandomBytes(length int) []byte {
+// GenerateRandomBytes_CharacterLibraryIndex generate random 'length' readable Bytes
+func GenerateRandomBytes_CharacterLibraryIndex(length int) []byte {
 	b := make([]byte, length)
 
 	randomNum, remainBits := rand.Int64(), 64
@@ -29,4 +33,11 @@ func GenerateRandomBytes(length int) []byte {
 	}
 
 	return b
+}
+
+func GenerateRandomBytes_BytesEncode(length int) string {
+	b := make([]byte, (length+1)/2)
+	_, _ = crand.Read(b)
+
+	return hex.EncodeToString(b)[:length]
 }
