@@ -5,6 +5,10 @@ Time-based One-Time Password
 是一种根据预共享的密钥与当前时间，计算带有时效性的密码的算法。  
 常用于2FA（Two-Factor Authenticate，二重因素验证）等场景。
 
+[OTP算法步骤详解](https://notes.mengxin.science/2017/05/30/hotp-totp-algorithm-analysis/)  
+[RFC 4226（HOTP）](https://datatracker.ietf.org/doc/html/rfc4226)  
+[RFC 6238（TOTP）](https://datatracker.ietf.org/doc/html/rfc6238)
+
 ## 过程
 
 > 括号内为通常的默认参数
@@ -25,11 +29,11 @@ OTP -> HOTP -> TOTP
 - OTP(K,C) = Truncate(Hash(K,C))
     - Truncate: 截取算法，将hash结果转变成一串数字
     - hash algorithm: hmac-sha-1
-    - C: 随机数
+    - C: hash原文，根据算法不同，使用计数器(HOTP)、时间步数(TOTP)
 
 截取算法：
 
-1. sha-1得到20 Bytes，取最后一个Byte的后4 bits作为起始索引（起始索引属于0～15）
+1. hash得到20 Bytes，取最后一个Byte的后4 bits作为起始索引（起始索引属于0～15）
 2. 从起始索引开始，往后获取总计4个Bytes，将其后31 bits转换为十进制数字作为随机长密码（舍弃最高位）
 3. 根据需要的位数d，取长密码的后d位，长度不足的在高位补0
 
@@ -41,7 +45,7 @@ OTP -> HOTP -> TOTP
 
 ## 代码示例
 
-go
+### go
 
 ``` go   
 func totp() {
@@ -85,7 +89,7 @@ func itob(integer int64) []byte {
 }
 ```
 
-dart
+### dart
 
 ```dart
 const int _timeInterval = 30;
@@ -128,9 +132,3 @@ Uint8List _int2Bytes(int long) {
   return byteArray;
 }
 ```
-
-## 参考资料
-
-[OTP算法步骤详解](https://notes.mengxin.science/2017/05/30/hotp-totp-algorithm-analysis/)  
-[RFC 4226（HOTP）](https://datatracker.ietf.org/doc/html/rfc4226)  
-[RFC 6238（TOTP）](https://datatracker.ietf.org/doc/html/rfc6238)

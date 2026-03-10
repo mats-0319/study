@@ -81,11 +81,9 @@
 
 ### 未使用git管理的文件
 
-`git ls-files --others`
+`git ls-files --others` 查看未加入版本管理的文件
 
-从版本管理中移除
-
-`git rm -r [folder_path] --cached`
+`git rm -r [folder_path] --cached` 从版本管理中移除
 
 删除未加入版本管理的文件：
 
