@@ -6,12 +6,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/mats9693/study/go/gocts/data"
-	"github.com/mats9693/study/go/gocts/utils"
+	"github.com/mats0319/study/go/gocts/token"
+	"github.com/mats0319/study/go/gocts/utils"
 )
 
-func backupGenerateFile(filename string) {
-	filePath := data.GeneratorIns.Config.GoDir + filename
+func backupGenerateFile(fileName string) {
+	filePath := token.GeneratorIns.Config.GoDir + fileName
 
 	_, err := os.Stat(filePath)
 	if err != nil {
@@ -19,8 +19,8 @@ func backupGenerateFile(filename string) {
 	}
 
 	// file exist, backup old file, backup failed NOT exit
-	backupPath := fmt.Sprintf("%s%s/%s-%d.txt", data.GeneratorIns.Config.GoDir,
-		utils.GoBackupFolderName, filename, time.Now().Unix())
+	backupPath := fmt.Sprintf("%s%s/%s-%d.txt", token.GeneratorIns.Config.GoDir,
+		utils.GoBackupFolderName, fileName, time.Now().Unix())
 	err = os.Rename(filePath, backupPath)
 	if err != nil {
 		log.Println("backup failed, error:", err)

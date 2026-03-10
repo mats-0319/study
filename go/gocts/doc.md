@@ -1,14 +1,14 @@
 # Gocts
 
-根据go语言定义的接口结构，生成相应的ts发送http请求的代码
+根据go语言定义的接口结构，生成相应的ts结构及发送http请求的代码
 
-（ts使用axios包发送http请求）
+- ts使用axios包发送http请求
 
 程序可以生成axios配置文件(`config.ts`)、发送http请求的函数文件(`*.http.ts`)以及相关结构体和枚举的定义文件(`*.go.ts`)
 
 ## 安装
 
-`go install github.com/mats9693/study/go/gocts`
+`go install github.com/mats0319/study/go/gocts`
 
 ## 使用
 
@@ -16,20 +16,21 @@
 
 ## 目录
 
-- data: 生成器结构定义（生成器：保存go代码解析结果并据此生成ts代码的结构）
-- generate: 根据生成器生成ts代码
-- initialize: 初始化功能，包含`-i`/`-g`等启动参数的功能实现
-- parse: 解析go代码
+- .run: goland运行配置，可以构建并在sample路径运行
+- initialize: 初始化功能，包含`-i`/`-g`等启动参数的响应
+- token: 生成器结构定义
+    - 生成器：保存go代码解析结果并据此生成ts代码的结构
+- scanner: 解析go代码
+- printer: 生成ts代码
 - sample: 使用示例
-- test: 测试
 - utils: 工具库
-- .run: goland运行配置，可以快速在sample路径构建并运行
 
 ## 约定
 
 - 所有用到的资源应全部在一个包内
-- 使用`const URI_[uri_name]=[uri_value]`结构定义接口uri
-    - e.g. `const URI_ListUser = "/user/list"`
+    - 计划使用go ast支持来自其他包的定义
+- 使用`const URI_[uri_name]=[uri_value]`结构定义接口uri，例如：`const URI_ListUser = "/user/list"`
+    - 如果uri的某一节由多个单词组成，应使用横线(`-`)或下划线(`_`)作为连字符，例如`/user/verify-code`
 - `type xxx struct {}`将被识别为自定义结构类型，其中结构体名称形如`xxxReq`/`xxxRes`者，
   将被识别为对应接口的输入/输出参数，每个定义的接口，其uri、接口输入输出参数名称要求一致。
     - e.g.
@@ -49,7 +50,8 @@
     }
     ```
     - 要求go结构体的每一个字段都有`json tag`，我们使用该tag作为结构体的名称
-- 使用下方示例中的方式定义一个枚举：
+    - 可以识别结构体前的行注释(`//`)，单行/多行均可，不支持段注释(`/* */`)
+- 使用以下方式定义一个枚举：
     - e.g.
     ```code 
     type UserIdentify int8
@@ -60,10 +62,10 @@
       UserIdentify_Value2 UserIdentify = 40
     ) 
     ```
+    - 仅接受值类型为数字类型的枚举，且每个枚举项均需显式提供枚举值
+    - 每个枚举项的命名应符合结构：`[enum type]_[desp]`，即以枚举名称开头，后跟下划线和描述性文字
     - 枚举可以以类型别名的方式定义(`type UserIdentify = int8`)
-    - 单个枚举项应符合结构：`[enum_item_name] [enum_name] = [enum_value]`
-        - 枚举项的名称应以枚举名称+下划线开头，形如：`[enum_name]_[xxx]`
-        - 每一个枚举项应显式给出枚举名称与枚举值
+    - 除了第一个枚举项，其他的可以省略枚举类型名称
 - 关于axios的基础配置的自适应性：
     - 使用`.env.development`等文件，避免开发/生产等不同环境下的参数硬编码进程序
     - 自适应内网访问（不止本机，主要是为了手机访问）
@@ -88,6 +90,6 @@ todo
   也尝试过使用form格式传参，但是后端解析很麻烦。
   使用json格式的不便之处在于传流式参数（例如文件），这一点目前还是通过form格式做。
 - 为什么所有的http请求方法都设计成了post方法？
-  设计过程中，随着阅读了http请求结构、restful api风格，发现可能它们不适合直接照搬过来使用，举几个例子：
+  设计过程中，我们阅读了http请求结构、restful api风格，发现可能它们不适合直接照搬过来使用，举几个例子：
     - get作为幂等的接口，其结果可能被http缓存，但实际上，对于一些变化的表，我们不希望它缓存查询结果
     - http 1.0 只有get/post方法，为了兼容，一些流行的库put/delete方法甚至是使用post模拟的，这大可不必

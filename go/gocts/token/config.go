@@ -1,31 +1,8 @@
-package data
+package token
 
-type Generator struct {
-	Config *GeneratorConfig
+import "github.com/mats0319/study/go/gocts/utils"
 
-	RequestAffiliation   map[string][]string // filename - request name(s)
-	StructureAffiliation map[string][]string // filename - structure name(s)
-
-	Requests   map[string]string         // request name - request uri
-	Structures map[string]*StructureItem // structure name - structure item
-
-	TsBasicType map[string]string // go basic type - ts basic type
-	TsZeroValue map[string]string // ts basic type - ts zero value
-
-	IndentationStr string // indentation str
-}
-
-var GeneratorIns = &Generator{
-	Config:               &GeneratorConfig{},
-	RequestAffiliation:   make(map[string][]string),
-	StructureAffiliation: make(map[string][]string),
-	Requests:             make(map[string]string),
-	Structures:           make(map[string]*StructureItem),
-	TsBasicType:          make(map[string]string),
-	TsZeroValue:          make(map[string]string),
-}
-
-type GeneratorConfig struct {
+type GenConfig struct {
 	// work path
 	GoDir string `json:"go_dir"`
 	TsDir string `json:"ts_dir"`
@@ -43,31 +20,7 @@ type GeneratorConfig struct {
 	Indentation int `json:"indentation"`
 }
 
-type StructureItem struct {
-	Name     string
-	FromFile string
-	Typ      *StructureType
-	Comment  string
-	Fields   []*StructureField
-}
-
-type StructureType struct {
-	IsStruct bool
-	IsEnum   bool
-}
-
-type StructureField struct {
-	Name       string // field name, from json tag of go struct field
-	GoType     string
-	IsArray    bool
-	IsEmbedded bool
-	Comment    string
-
-	TSType      string
-	TSZeroValue string
-}
-
-var DefaultGeneratorConfig = &GeneratorConfig{
+var DefaultGeneratorConfig = &GenConfig{
 	GoDir:                   "./go/",
 	TsDir:                   "./ts/",
 	RequestStructureSuffix:  "Req",
@@ -98,4 +51,45 @@ var DefaultGeneratorConfig = &GeneratorConfig{
 		TsZeroValue: `{}`,
 	}},
 	Indentation: 4,
+}
+
+// make sure all configs are valid, use default config cover empty ones
+func (c *GenConfig) mustValid() {
+	if len(c.GoDir) < 1 {
+		c.GoDir = DefaultGeneratorConfig.GoDir
+	} else {
+		c.GoDir = utils.MustSuffix(c.GoDir, "/")
+	}
+	if len(c.TsDir) < 1 {
+		c.TsDir = DefaultGeneratorConfig.TsDir
+	} else {
+		c.TsDir = utils.MustSuffix(c.TsDir, "/")
+	}
+	utils.MustExistDir(c.GoDir)
+	utils.MustExistDir(c.GoDir + utils.GoBackupFolderName + "/")
+	utils.EmptyDir(c.TsDir)
+
+	if len(c.RequestStructureSuffix) < 1 {
+		c.RequestStructureSuffix = DefaultGeneratorConfig.RequestStructureSuffix
+	}
+	if len(c.ResponseStructureSuffix) < 1 {
+		c.ResponseStructureSuffix = DefaultGeneratorConfig.ResponseStructureSuffix
+	}
+	if len(c.RequestFileSuffix) < 1 {
+		c.RequestFileSuffix = DefaultGeneratorConfig.RequestFileSuffix
+	} else {
+		c.RequestFileSuffix = utils.MustSuffix(c.RequestFileSuffix, ".ts")
+	}
+	if len(c.StructureFileSuffix) < 1 {
+		c.StructureFileSuffix = DefaultGeneratorConfig.StructureFileSuffix
+	} else {
+		c.StructureFileSuffix = utils.MustSuffix(c.StructureFileSuffix, ".ts")
+	}
+
+	if len(c.BasicGoType) < 1 {
+		c.BasicGoType = DefaultGeneratorConfig.BasicGoType
+	}
+	if c.Indentation < 1 {
+		c.Indentation = DefaultGeneratorConfig.Indentation
+	}
 }

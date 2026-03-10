@@ -4,21 +4,21 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mats9693/study/go/gocts/data"
-	"github.com/mats9693/study/go/gocts/utils"
+	"github.com/mats0319/study/go/gocts/token"
+	"github.com/mats0319/study/go/gocts/utils"
 )
 
 func GenerateRequestFiles() {
-	for filename := range data.GeneratorIns.RequestAffiliation {
+	for fileName := range token.GeneratorIns.RequestFrom {
 		content := utils.Copyright
-		content = append(content, formatRequestFile(filename)...)
+		content = append(content, formatRequestFile(fileName)...)
 
-		absolutePath := data.GeneratorIns.Config.TsDir + filename + data.GeneratorIns.Config.RequestFileSuffix
+		absolutePath := token.GeneratorIns.Config.TsDir + fileName + token.GeneratorIns.Config.RequestFileSuffix
 		utils.WriteFile(absolutePath, content)
 	}
 }
 
-func formatRequestFile(filename string) string {
+func formatRequestFile(fileName string) string {
 	requestFileStr := `
 import { axiosWrapper } from "./config"
 import { AxiosResponse } from "axios"
@@ -32,40 +32,40 @@ export const {{ $filename_Small }}Axios: {{ $filename_Big }}Axios = new {{ $file
 `
 
 	externalStructures := make(map[string]*utils.Set)
-	requestStr := formatHttpRequests(filename, externalStructures)
+	requestStr := formatHttpRequests(fileName, externalStructures)
 
 	importStructuresStr := formatStructuresImport(externalStructures)
 	importStructuresStr = strings.TrimSpace(importStructuresStr)
 
 	requestFileStr = strings.ReplaceAll(requestFileStr, "{{ $importStructures }}", importStructuresStr)
-	requestFileStr = strings.ReplaceAll(requestFileStr, "{{ $filename_Small }}", utils.MustSmall(filename))
-	requestFileStr = strings.ReplaceAll(requestFileStr, "{{ $filename_Big }}", utils.MustBig(filename))
+	requestFileStr = strings.ReplaceAll(requestFileStr, "{{ $filename_Small }}", utils.MustSmall(fileName))
+	requestFileStr = strings.ReplaceAll(requestFileStr, "{{ $filename_Big }}", utils.MustBig(fileName))
 	requestFileStr = strings.ReplaceAll(requestFileStr, "{{ $requests }}", requestStr)
-	requestFileStr = strings.ReplaceAll(requestFileStr, "{{ $indentation }}", data.GeneratorIns.IndentationStr)
+	requestFileStr = strings.ReplaceAll(requestFileStr, "{{ $indentation }}", token.GeneratorIns.IndentationStr)
 
 	return requestFileStr
 }
 
 // formatHttpRequests format http requests, also statistics external structures for declare their import statement
-func formatHttpRequests(filename string, externalStructures map[string]*utils.Set) string {
+func formatHttpRequests(fileName string, externalStructures map[string]*utils.Set) string {
 	var requestsStr strings.Builder
 
-	for _, requestName := range data.GeneratorIns.RequestAffiliation[filename] {
-		structureItemIns := &data.StructureItem{}
+	for _, requestName := range token.GeneratorIns.RequestFrom[fileName] {
+		structureItemIns := &token.StructureItem{}
 
-		reqStructureName := requestName + data.GeneratorIns.Config.RequestStructureSuffix
-		for _, structureName := range data.GeneratorIns.StructureAffiliation[filename] {
+		reqStructureName := requestName + token.GeneratorIns.Config.RequestStructureSuffix
+		for _, structureName := range token.GeneratorIns.StructureFrom[fileName] {
 			if structureName == reqStructureName { // find 'xxxReq' message
-				structureItemIns, _ = data.GeneratorIns.Structures[structureName]
+				structureItemIns, _ = token.GeneratorIns.Structures[structureName]
 				break
 			}
 		}
 
-		responseResName := requestName + data.GeneratorIns.Config.ResponseStructureSuffix
-		externalStructures[filename] = externalStructures[filename].Add(responseResName)
+		responseResName := requestName + token.GeneratorIns.Config.ResponseStructureSuffix
+		externalStructures[fileName] = externalStructures[fileName].Add(responseResName)
 
 		if len(structureItemIns.Fields) > 0 { // 'xxxReq' has fields
-			externalStructures[filename] = externalStructures[filename].Add(reqStructureName)
+			externalStructures[fileName] = externalStructures[fileName].Add(reqStructureName)
 		}
 
 		requestsStr.WriteString(formatOneHttpRequest(requestName, structureItemIns, externalStructures))
@@ -75,7 +75,7 @@ func formatHttpRequests(filename string, externalStructures map[string]*utils.Se
 }
 
 // formatOneHttpRequest
-func formatOneHttpRequest(requestName string, structureItemIns *data.StructureItem, externalStructures map[string]*utils.Set) string {
+func formatOneHttpRequest(requestName string, structureItemIns *token.StructureItem, externalStructures map[string]*utils.Set) string {
 	httpReqInvokeStr := `
 {{ $indentation }}public {{ $requestName_Small }}({{ $inputParams }}): Promise<AxiosResponse<{{ $requestName }}{{ $responseStructureSuffix }}>> {{{ $requestParam }}
 {{ $indentation }}{{ $indentation }}return axiosWrapper.post("{{ $requestURI }}"{{ $invokeParam }})
@@ -84,8 +84,8 @@ func formatOneHttpRequest(requestName string, structureItemIns *data.StructureIt
 
 	httpReqInvokeStr = strings.ReplaceAll(httpReqInvokeStr, "{{ $requestName_Small }}", utils.MustSmall(requestName))
 	httpReqInvokeStr = strings.ReplaceAll(httpReqInvokeStr, "{{ $requestName }}", requestName)
-	httpReqInvokeStr = strings.ReplaceAll(httpReqInvokeStr, "{{ $responseStructureSuffix }}", data.GeneratorIns.Config.ResponseStructureSuffix)
-	httpReqInvokeStr = strings.ReplaceAll(httpReqInvokeStr, "{{ $requestURI }}", data.GeneratorIns.Requests[requestName])
+	httpReqInvokeStr = strings.ReplaceAll(httpReqInvokeStr, "{{ $responseStructureSuffix }}", token.GeneratorIns.Config.ResponseStructureSuffix)
+	httpReqInvokeStr = strings.ReplaceAll(httpReqInvokeStr, "{{ $requestURI }}", token.GeneratorIns.Requests[requestName])
 
 	var (
 		inputParamStr   string
@@ -100,7 +100,7 @@ func formatOneHttpRequest(requestName string, structureItemIns *data.StructureIt
 			requestParamsSlice = append(requestParamsSlice, fmt.Sprintf("%s: %s,", structureField.Name, structureField.Name))
 
 			// record if structure field's type need import from another file
-			if structureIns, ok := data.GeneratorIns.Structures[structureField.GoType]; ok {
+			if structureIns, ok := token.GeneratorIns.Structures[structureField.GoType]; ok {
 				externalStructures[structureIns.FromFile] = externalStructures[structureIns.FromFile].Add(structureField.TSType)
 			}
 		}
@@ -134,7 +134,7 @@ func formatHttpRequestParam(requestName string, requestInputs []string) string {
 `
 	httpReqInputStr = strings.ReplaceAll(httpReqInputStr, "{{ $requestFields }}", fieldStr)
 	httpReqInputStr = strings.ReplaceAll(httpReqInputStr, "{{ $requestName }}", requestName)
-	httpReqInputStr = strings.ReplaceAll(httpReqInputStr, "{{ $requestMessageSuffix }}", data.GeneratorIns.Config.RequestStructureSuffix)
+	httpReqInputStr = strings.ReplaceAll(httpReqInputStr, "{{ $requestMessageSuffix }}", token.GeneratorIns.Config.RequestStructureSuffix)
 
 	return httpReqInputStr
 }

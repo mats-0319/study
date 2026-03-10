@@ -10,13 +10,13 @@ import (
 )
 
 // WriteFile write 'content' into 'file'
-func WriteFile[T string | []byte](filename string, content T) {
-	err := os.WriteFile(filename, []byte(content), 0777)
+func WriteFile[T string | []byte](fileName string, content T) {
+	err := os.WriteFile(fileName, []byte(content), 0777)
 	if err != nil {
 		log.Fatalln("write file failed, error: ", err)
 	}
 
-	log.Println("Generated file: ", filename)
+	log.Println("Generated file: ", fileName)
 }
 
 // MustSmall make 'str' to small-start camel case, e.g. "Must_small" => "mustSmall"

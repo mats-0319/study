@@ -3,15 +3,15 @@ package gen
 import (
 	"strings"
 
-	"github.com/mats9693/study/go/gocts/data"
-	"github.com/mats9693/study/go/gocts/utils"
+	"github.com/mats0319/study/go/gocts/token"
+	"github.com/mats0319/study/go/gocts/utils"
 )
 
 func GenerateConfigFile() {
 	content := utils.Copyright
 	content = append(content, formatConfigFile()...)
 
-	utils.WriteFile(data.GeneratorIns.Config.TsDir+"config.ts", content)
+	utils.WriteFile(token.GeneratorIns.Config.TsDir+"config.ts", content)
 }
 
 func formatConfigFile() string {
@@ -40,7 +40,7 @@ function getBaseUrl(): string {
 // modify 'vite.config.ts', add config:
 // envPrefix: "Vite_"
 `
-	configStr = strings.ReplaceAll(configStr, "{{ $indentation }}", data.GeneratorIns.IndentationStr)
+	configStr = strings.ReplaceAll(configStr, "{{ $indentation }}", token.GeneratorIns.IndentationStr)
 
 	return configStr
 }

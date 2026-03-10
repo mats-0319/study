@@ -1,4 +1,4 @@
-package parse
+package scanner
 
 import (
 	"fmt"
@@ -7,14 +7,14 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mats9693/study/go/gocts/data"
-	"github.com/mats9693/study/go/gocts/utils"
+	"github.com/mats0319/study/go/gocts/token"
+	"github.com/mats0319/study/go/gocts/utils"
 )
 
 func TraversalDir() {
-	entry, err := os.ReadDir(data.GeneratorIns.Config.GoDir)
+	entry, err := os.ReadDir(token.GeneratorIns.Config.GoDir)
 	if err != nil {
-		log.Fatalln(fmt.Sprintf("read dir %s failed, error: %v", data.GeneratorIns.Config.GoDir, err))
+		log.Fatalln(fmt.Sprintf("read dir %s failed, error: %v", token.GeneratorIns.Config.GoDir, err))
 	}
 
 	for i := range entry {
@@ -39,43 +39,44 @@ func TraversalDir() {
 	processStructures()
 }
 
-func parseGoFile(filename string) {
-	absolutePath := data.GeneratorIns.Config.GoDir + filename
+func parseGoFile(fileName string) {
+	absolutePath := token.GeneratorIns.Config.GoDir + fileName
 	fileBytes, err := os.ReadFile(absolutePath)
 	if err != nil {
 		log.Fatalln(fmt.Sprintf("read go file(%s) failed, error: %v", absolutePath, err))
 	}
 
-	filename = strings.TrimSuffix(filename, ".go")
+	fileName = strings.TrimSuffix(fileName, ".go")
 
-	matchRequests(filename, fileBytes)
-	matchStructs(filename, fileBytes)
-	matchEnums(filename, fileBytes)
+	matchRequests(fileName, fileBytes)
+	matchStructs(fileName, fileBytes)
+	matchEnums(fileName, fileBytes)
 }
 
 // processStructures do things:
-// 1. set ts type and ts zero value for each field of go 'struct' typ
+// 1. set ts type info ('type name' and 'zero value') for each field of go structure item
 func processStructures() {
-	for _, structureIns := range data.GeneratorIns.Structures {
-		if structureIns.Typ.IsEnum {
-			continue // ignore enum types, enum has set ts type and ts zero value when matched
+	for _, structureIns := range token.GeneratorIns.Structures {
+		if structureIns.Typ == token.StructureType_Enum {
+			continue // ignore enum types, enum has set ts type info when matched
 		}
 
-		setTsTypeAndZeroValue(structureIns)
+		setTsTypeInfo(structureIns)
 	}
 }
 
-func setTsTypeAndZeroValue(structureIns *data.StructureItem) {
+func setTsTypeInfo(structureIns *token.StructureItem) {
 	for i := 0; i < len(structureIns.Fields); i++ {
 		fieldIns := structureIns.Fields[i]
-		targetStructure, ok := data.GeneratorIns.Structures[fieldIns.GoType]
+		targetStructure, ok := token.GeneratorIns.Structures[fieldIns.GoType]
 
 		if fieldIns.IsEmbedded {
 			if !ok {
 				log.Fatalln("unknown embedded struct: ", fieldIns.GoType)
 			}
 			// 如果一个字段既不具名、也不带有json tag，则将其视作嵌入式结构体，
-			// 移除该字段，将该字段所示嵌入式结构体的字段提高到与该字段同级
+			// 将该字段所示嵌入式结构体的字段提高到与该字段同级，移除该字段
+			// （如果一个匿名字段带有json tag，则将其视作正常的具名嵌套结构体，这与json marshal处理方式一致）
 			structureIns.Fields = append(structureIns.Fields[:i], structureIns.Fields[i+1:]...)
 			structureIns.Fields = append(structureIns.Fields, targetStructure.Fields...)
 			i--
@@ -83,19 +84,21 @@ func setTsTypeAndZeroValue(structureIns *data.StructureItem) {
 		}
 
 		if !ok { // basic type, in type map
-			tsBasicType, _ := data.GeneratorIns.TsBasicType[fieldIns.GoType]
-			tsZeroValue, _ := data.GeneratorIns.TsZeroValue[tsBasicType]
-			fieldIns.TSType = tsBasicType
-			fieldIns.TSZeroValue = tsZeroValue
+			tsBasicType, ok2 := token.GeneratorIns.TsType[fieldIns.GoType]
+			if !ok2 { // 未知go类型，不在注册的go基础类型中，也不在当前包内
+				log.Fatalln("unknown go type: ", fieldIns.GoType)
+			}
+			fieldIns.TSType = tsBasicType.Name
+			fieldIns.TSZeroValue = tsBasicType.ZeroValue
 		} else { // self-define type
 			fieldIns.TSType = fieldIns.GoType
 			// 假设程序扫描到结构体S里的字段F，字段F的类型不是内置类型但具体定义还没扫描到，
-			// 也就是说没有办法判断字段F是结构体类型还是枚举类型，这会影响字段F的ts零值设置，
+			// 即此时没有办法判断字段F是结构体类型还是枚举类型，这会影响字段F的ts零值设置，
 			// 所以我们没有扫描到一个struct就设置其字段的ts类型与零值，而是在全部扫描完成后统一设置
 			switch { // if struct field is struct type / enum type
-			case targetStructure.Typ.IsStruct:
+			case targetStructure.Typ == token.StructureType_Struct:
 				fieldIns.TSZeroValue = fmt.Sprintf("new %s()", fieldIns.GoType)
-			case targetStructure.Typ.IsEnum:
+			case targetStructure.Typ == token.StructureType_Enum:
 				fieldIns.TSZeroValue = fmt.Sprintf("%s.%s", targetStructure.Fields[0].TSType, utils.EnumPlaceholder)
 			}
 		}

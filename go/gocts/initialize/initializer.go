@@ -4,9 +4,22 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mats9693/study/go/gocts/data"
-	"github.com/mats9693/study/go/gocts/utils"
+	"github.com/mats0319/study/go/gocts/token"
+	"github.com/mats0319/study/go/gocts/utils"
 )
+
+type Initializer struct {
+	PackageName string       `json:"package_name"` // 因为同文件夹下.go文件的包名应统一，这里就提出来了
+	Files       []*GoAPIFile `json:"files"`
+}
+
+var InitializerIns = &Initializer{}
+
+type GoAPIFile struct {
+	FileName string      `json:"file_name"`
+	APIList  []*APIItem  `json:"api_list"`
+	EnumList []*EnumItem `json:"enum_list"`
+}
 
 func (ins *GoAPIFile) writeFile(packageName string) {
 	var content strings.Builder
@@ -24,8 +37,13 @@ func (ins *GoAPIFile) writeFile(packageName string) {
 
 	backupGenerateFile(ins.FileName)
 
-	filePath := data.GeneratorIns.Config.GoDir + ins.FileName
+	filePath := token.GeneratorIns.Config.GoDir + ins.FileName
 	utils.WriteFile(filePath, content.String())
+}
+
+type APIItem struct {
+	Name string `json:"name"`
+	URI  string `json:"uri"`
 }
 
 func (ins *APIItem) toGo() string {
@@ -39,16 +57,19 @@ type {{ $apiName }}{{ $resSuffix }} struct {}
 
 	res = strings.ReplaceAll(res, "{{ $apiName }}", ins.Name)
 	res = strings.ReplaceAll(res, "{{ $apiURI }}", ins.URI)
-	res = strings.ReplaceAll(res, "{{ $reqSuffix }}", data.GeneratorIns.Config.RequestStructureSuffix)
-	res = strings.ReplaceAll(res, "{{ $resSuffix }}", data.GeneratorIns.Config.ResponseStructureSuffix)
+	res = strings.ReplaceAll(res, "{{ $reqSuffix }}", token.GeneratorIns.Config.RequestStructureSuffix)
+	res = strings.ReplaceAll(res, "{{ $resSuffix }}", token.GeneratorIns.Config.ResponseStructureSuffix)
 
 	return res
 }
 
+type EnumItem struct {
+	Name   string `json:"name"`
+	Number int    `json:"number"`
+}
+
 func (ins *EnumItem) toGo() string {
-	if ins.Number > 1<<7-1 {
-		ins.Number = 1<<7 - 1
-	}
+	ins.Number = min(ins.Number, 20) // not too much
 
 	enumUnitsStr := ""
 	if ins.Number > 0 {
@@ -66,7 +87,7 @@ const ({{ $enumUnits }})
 
 	enumItemStr = strings.ReplaceAll(enumItemStr, "{{ $enumUnits }}", enumUnitsStr)
 	enumItemStr = strings.ReplaceAll(enumItemStr, "{{ $enumName }}", ins.Name)
-	enumItemStr = strings.ReplaceAll(enumItemStr, "{{ $indentation }}", data.GeneratorIns.IndentationStr)
+	enumItemStr = strings.ReplaceAll(enumItemStr, "{{ $indentation }}", token.GeneratorIns.IndentationStr)
 
 	return enumItemStr
 }
