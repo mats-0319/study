@@ -9,7 +9,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io"
 	"os"
 	"strings"
 )
@@ -117,7 +116,7 @@ func doEncrypt(pubKey *ecdh.PublicKey, content []byte) []byte {
 	}
 
 	nonce := make([]byte, aesgcm.NonceSize())
-	_, err = io.ReadFull(rand.Reader, nonce)
+	_, err = rand.Read(nonce)
 	if err != nil {
 		Error("Generate random nonce", err)
 		return nil
