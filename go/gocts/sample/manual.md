@@ -1,7 +1,7 @@
-# sample
+# manual
 
 ```cmd
-> go install github.com/mats9693/study/go/gocts
+> go install github.com/mats0319/study/go/gocts
 > gocts -h
 
 2025/11/24 10:39:37 Options: 

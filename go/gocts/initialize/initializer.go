@@ -75,8 +75,8 @@ func (ins *EnumItem) toGo() string {
 	if ins.Number > 0 {
 		enumUnitsStr = "\n"
 	}
-	for i := range ins.Number { // 'ins.Number' < 0 is ok
-		enumUnitsStr += fmt.Sprintf("{{ $indentation }}{{ $enumName }}_Value%d {{ $enumName }} = %d\n", i, i)
+	for i := range ins.Number {
+		enumUnitsStr += fmt.Sprintf("{{ $indentation }}{{ $enumName }}_Value%d {{ $enumName }} = %d\n", i+1, i+1)
 	}
 
 	enumItemStr := `

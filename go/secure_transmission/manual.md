@@ -20,19 +20,19 @@
 使用过程中会传输两次文件（即前文使用全大写命名的两个文件），这个传输可以通过任意方式、不必担心安全问题。
 
 ```cmd
-2025/12/01 15:23:01 > Enter Your Command. ('h' for help)
+2026/03/14 11:26:40 > Enter Your Command ('h' for help) .
 h
-2025/12/01 15:23:03 
-> Options:
+2026/03/14 11:26:46 > Options:
   - h: this help
   - g: generate public & private key into files ('./priv.key' & './PUB.KEY')
   - i: initialize message file './message.txt'
   - e: encrypt plain text from './message.xxx' and write cipher to './CIPHER.XXX'
   - d: decrypt cipher from './CIPHER.XXX' and write plain text to './message_decrypted.xxx'
+  - exit: exit program
 
-note: encrypt/decrypt support automatic recognize 'file extension', in fact, 
+note: encrypt/decrypt support automatic recognize 'file extension', in fact: 
 when encrypt, we find first file which name matched 'message.[xxx]' and encrypt it into 'CIPHER.[XXX]';
-when decrypt, we find first file which name matched 'CIPHER.[XXX]' and decrypt it into 'message_decrypted.[xxx]'
+when decrypt, we find first file which name matched 'CIPHER.[XXX]' and decrypt it into 'message_decrypted.[xxx]' .
 ```
 
 ## 说明

@@ -2,18 +2,15 @@ package main
 
 import (
 	"crypto/ecdh"
-	"crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
 	"os"
 )
 
-// generate P256 curve, keys use 'x509.marshal' to file bytes
 func generateKeypair() {
-	// generate private key
-	privKey, err := ecdh.P256().GenerateKey(rand.Reader)
+	privKey, err := generatePrivateKey()
 	if err != nil {
-		Log("Generate private key", err)
+		Error("Generate private key", err)
 		return
 	}
 
@@ -27,13 +24,13 @@ func generateKeypair() {
 		return
 	}
 
-	Log("Generate key pair")
+	Success("Generate key pair")
 }
 
 func savePrivateKey(privKey *ecdh.PrivateKey) error {
 	privKeyBytes, err := x509.MarshalPKCS8PrivateKey(privKey)
 	if err != nil {
-		Log("Marshal private key", err)
+		Error("Marshal private key", err)
 		return err
 	}
 
@@ -42,7 +39,7 @@ func savePrivateKey(privKey *ecdh.PrivateKey) error {
 
 	err = os.WriteFile(privateKeyFilePath, blockBytes, 0600)
 	if err != nil {
-		Log("Save private key", err)
+		Error("Save private key", err)
 		return err
 	}
 
@@ -52,7 +49,7 @@ func savePrivateKey(privKey *ecdh.PrivateKey) error {
 func savePublicKey(pubKey *ecdh.PublicKey) error {
 	pubKeyBytes, err := x509.MarshalPKIXPublicKey(pubKey)
 	if err != nil {
-		Log("Marshal public key", err)
+		Error("Marshal public key", err)
 		return err
 	}
 
@@ -61,7 +58,7 @@ func savePublicKey(pubKey *ecdh.PublicKey) error {
 
 	err = os.WriteFile(publicKeyFilePath, blockBytes, 0644)
 	if err != nil {
-		Log("Save public key", err)
+		Error("Save public key", err)
 		return err
 	}
 

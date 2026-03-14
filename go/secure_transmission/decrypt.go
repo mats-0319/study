@@ -26,7 +26,7 @@ func decrypt() {
 
 	cipherBytes, err := os.ReadFile(filePath)
 	if err != nil {
-		Log("Read cipher file", err)
+		Error("Read cipher file", err)
 		return
 	}
 
@@ -40,29 +40,29 @@ func decrypt() {
 	extension := strings.ToLower(getExtension(filePath, cipherFileName))
 	err = os.WriteFile(fmt.Sprintf("./%s%s", plainTextDecryptedFileName, extension), fileBytes, 0777)
 	if err != nil {
-		Log("Write message", err)
+		Error("Write message", err)
 		return
 	}
 
-	Log("Decrypt")
+	Success("Decrypt")
 }
 
 func getPrivKey() *ecdh.PrivateKey {
 	privKeyBytes, err := os.ReadFile(privateKeyFilePath)
 	if err != nil {
-		Log("Read private key", err)
+		Error("Read private key", err)
 		return nil
 	}
 
 	block, _ := pem.Decode(privKeyBytes)
 	if block == nil {
-		Log("Decode private key", emptyErr)
+		Error("Decode private key", nil)
 		return nil
 	}
 
 	privKeyI, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 	if err != nil {
-		Log("Parse private key", err)
+		Error("Parse private key", err)
 		return nil
 	}
 
@@ -70,13 +70,13 @@ func getPrivKey() *ecdh.PrivateKey {
 	if !ok {
 		ecdsaPrivKey, ok := privKeyI.(*ecdsa.PrivateKey)
 		if !ok {
-			Log("Private key type assert", emptyErr)
+			Error("Private key type assert", nil)
 			return nil
 		}
 
 		privKey, err = ecdsaPrivKey.ECDH()
 		if err != nil {
-			Log("ECDSA private key to ecdh", err)
+			Error("ECDSA private key to ecdh", err)
 			return nil
 		}
 	}
@@ -84,46 +84,49 @@ func getPrivKey() *ecdh.PrivateKey {
 	return privKey
 }
 
-func doDecrypt(privKey *ecdh.PrivateKey, data []byte) []byte {
-	if len(data) < 1 {
-		Log("Invalid cipher", emptyErr)
+func doDecrypt(privKey *ecdh.PrivateKey, fileBytes []byte) []byte {
+	if len(fileBytes) < 1 {
+		Error("Invalid cipher", nil)
 		return nil
 	}
 
-	tempPubKeyLength := int(data[0])
-	tempPubKeyBytes := data[1 : 1+tempPubKeyLength]
-	tempPubKey, err := ecdh.P256().NewPublicKey(tempPubKeyBytes)
+	pubKeyBytes, nonce, ciphertext, err := decodeCipherFile(fileBytes)
 	if err != nil {
-		Log("New public key", err)
+		return nil
+	}
+
+	// generate final decrypt key
+	tempPubKey, err := ecdh.P256().NewPublicKey(pubKeyBytes)
+	if err != nil {
+		Error("Load public key", err)
 		return nil
 	}
 
 	sharedKey, err := privKey.ECDH(tempPubKey)
 	if err != nil {
-		Log("Generate shared key", err)
+		Error("ECDH", err)
 		return nil
 	}
 
-	block, err := aes.NewCipher(sharedKey)
-	if err != nil {
-		Log("Build cipher block", err)
-		return nil
+	// aes-gcm decrypt
+	var aesgcm cipher.AEAD
+	{
+		block, err := aes.NewCipher(sharedKey)
+		if err != nil {
+			Error("Build cipher block", err)
+			return nil
+		}
+
+		aesgcm, err = cipher.NewGCM(block)
+		if err != nil {
+			Error("Build GCM", err)
+			return nil
+		}
 	}
 
-	aesgcm, err := cipher.NewGCM(block)
+	message, err := aesgcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
-		Log("Build GCM", err)
-		return nil
-	}
-
-	nonceSize := aesgcm.NonceSize()
-
-	nonce := data[1+tempPubKeyLength : 1+tempPubKeyLength+nonceSize]
-	cipherText := data[1+tempPubKeyLength+nonceSize:]
-
-	message, err := aesgcm.Open(nil, nonce, cipherText, nil)
-	if err != nil {
-		Log("Open ciphertext", err)
+		Error("Decrypt", err)
 		return nil
 	}
 

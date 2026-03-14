@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -26,7 +25,7 @@ func start() {
 
 ALL:
 	for {
-		log.Println("> Enter Your Command. ('h' for help)")
+		Info("Enter Your Command ('h' for help)")
 
 		if !scanner.Scan() {
 			break
@@ -37,35 +36,35 @@ ALL:
 		switch matched {
 		case "h", "help":
 			printHelp()
-		case "g":
+		case "g", "gen", "generate":
 			generateKeypair()
-		case "i":
+		case "i", "init", "initialize":
 			initMessageFile()
-		case "e":
+		case "e", "encrypt":
 			encrypt()
-		case "d":
+		case "d", "decrypt":
 			decrypt()
 		case "exit":
-			log.Println("> Exit.")
+			Info("Exit")
 			break ALL
 		default:
-			log.Println("> Unknown input: ", text, ", 'h' for help")
+			Info("Unknown input: " + text + ", 'h' for help")
 		}
 	}
 }
 
 func initMessageFile() {
-	err := os.WriteFile(plainTextFileName+defaultExtension, []byte("test plain text"), 0777)
+	err := os.WriteFile(plainTextFileName+defaultExtension, []byte("Write your message here"), 0777)
 	if err != nil {
-		Log("Initialize message file", err)
+		Error("Initialize message file", err)
 		return
 	}
 
-	Log("Initialize message file")
+	Success("Initialize message file")
 }
 
 func printHelp() {
-	log.Print(`> Options:
+	Info(`Options:
   - h: this help
   - g: generate public & private key into files ('./priv.key' & './PUB.KEY')
   - i: initialize message file './message.txt'
@@ -75,6 +74,5 @@ func printHelp() {
 
 note: encrypt/decrypt support automatic recognize 'file extension', in fact: 
 when encrypt, we find first file which name matched 'message.[xxx]' and encrypt it into 'CIPHER.[XXX]';
-when decrypt, we find first file which name matched 'CIPHER.[XXX]' and decrypt it into 'message_decrypted.[xxx]'
-`)
+when decrypt, we find first file which name matched 'CIPHER.[XXX]' and decrypt it into 'message_decrypted.[xxx]'`)
 }
