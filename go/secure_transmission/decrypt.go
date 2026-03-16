@@ -90,7 +90,7 @@ func doDecrypt(privKey *ecdh.PrivateKey, fileBytes []byte) []byte {
 		return nil
 	}
 
-	pubKeyBytes, nonce, ciphertext, err := decodeCipherFile(fileBytes)
+	pubKeyBytes, ciphertext, err := decodeCipherFile(fileBytes)
 	if err != nil {
 		return nil
 	}
@@ -117,14 +117,14 @@ func doDecrypt(privKey *ecdh.PrivateKey, fileBytes []byte) []byte {
 			return nil
 		}
 
-		aesgcm, err = cipher.NewGCM(block)
+		aesgcm, err = cipher.NewGCMWithRandomNonce(block)
 		if err != nil {
 			Error("Build GCM", err)
 			return nil
 		}
 	}
 
-	message, err := aesgcm.Open(nil, nonce, ciphertext, nil)
+	message, err := aesgcm.Open(nil, nil, ciphertext, nil)
 	if err != nil {
 		Error("Decrypt", err)
 		return nil

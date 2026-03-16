@@ -5,7 +5,6 @@ import (
 	"crypto/cipher"
 	"crypto/ecdh"
 	"crypto/ecdsa"
-	"crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
@@ -108,21 +107,14 @@ func doEncrypt(pubKey *ecdh.PublicKey, content []byte) []byte {
 			return nil
 		}
 
-		aesgcm, err = cipher.NewGCM(block)
+		aesgcm, err = cipher.NewGCMWithRandomNonce(block)
 		if err != nil {
 			Error("Build GCM", err)
 			return nil
 		}
 	}
 
-	nonce := make([]byte, aesgcm.NonceSize())
-	_, err = rand.Read(nonce)
-	if err != nil {
-		Error("Generate random nonce", err)
-		return nil
-	}
+	ciphertext := aesgcm.Seal(nil, nil, content, nil)
 
-	ciphertext := aesgcm.Seal(nil, nonce, content, nil)
-
-	return encodeCipherFile(tempPrivKey.PublicKey().Bytes(), nonce, ciphertext)
+	return encodeCipherFile(tempPrivKey.PublicKey().Bytes(), ciphertext)
 }

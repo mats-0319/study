@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
 	"crypto/ecdh"
 	"errors"
 	"log"
@@ -22,15 +20,14 @@ func Error(behavior string, err error) {
 	log.Printf("> %s failed, error: %v\n", behavior, err)
 }
 
-func encodeCipherFile(pubKeyBytes []byte, nonce []byte, ciphertext []byte) []byte {
+func encodeCipherFile(pubKeyBytes []byte, ciphertext []byte) []byte {
 	result := append([]byte{byte(len(pubKeyBytes))}, pubKeyBytes...)
-	result = append(result, nonce...)
 	result = append(result, ciphertext...)
 
 	return result
 }
 
-func decodeCipherFile(fileBytes []byte) (pubKeyBytes []byte, nonce []byte, ciphertext []byte, err error) {
+func decodeCipherFile(fileBytes []byte) (pubKeyBytes []byte, ciphertext []byte, err error) {
 	if len(fileBytes) < 1 {
 		err = errors.New("invalid cipher")
 		Error("Invalid cipher", err)
@@ -39,28 +36,7 @@ func decodeCipherFile(fileBytes []byte) (pubKeyBytes []byte, nonce []byte, ciphe
 
 	pubkLength := int(fileBytes[0])
 	pubKeyBytes = fileBytes[1 : 1+pubkLength]
-
-	var nonceSize int
-	{
-		var block cipher.Block
-		block, err = aes.NewCipher(make([]byte, 32))
-		if err != nil {
-			Error("Build cipher block", err)
-			return
-		}
-
-		var aesgcm cipher.AEAD
-		aesgcm, err = cipher.NewGCM(block)
-		if err != nil {
-			Error("Build GCM", err)
-			return
-		}
-
-		nonceSize = aesgcm.NonceSize()
-	}
-
-	nonce = fileBytes[1+pubkLength : 1+pubkLength+nonceSize]
-	ciphertext = fileBytes[1+pubkLength+nonceSize:]
+	ciphertext = fileBytes[1+pubkLength:]
 
 	return
 }
