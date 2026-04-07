@@ -45,6 +45,8 @@ const doubleValue = computed(() => store.doubleCount)
 
 ### 持久化
 
+我使用持久化组建时总是报错，在尝试过多个环境/版本后放弃，决定使用storage自行实现
+
 ```code 
 const loginStore = useLoginStore();
 
@@ -147,47 +149,45 @@ export function getLocalIP(): string {
 我们注意到，ts和vite的配置都包含路径解析`@`表示`/src/`，其中vite的配置是供程序使用的，而ts的配置是给ide使用的：
 如果删除vite的配置，则程序无法正确build；如果删除ts的配置，ide会报错（重启ide）。
 
-## eslint+prettier
+## eslint
 
-> 学习时间：2026.1
+> 学习时间：2026.4
 > eslint: 9
 
-eslint.config.js
+在使用prettier的过程中，发现prettier和eslint经常互相打架，决定只使用eslint：
 
 ``` js
-import { defineConfig, globalIgnores } from "eslint/config"
-import vueTs from "@vue/eslint-config-typescript"
-import vuePrettier from "@vue/eslint-config-prettier"
-import vueParser from "vue-eslint-parser"
-import tsParser from "@typescript-eslint/parser"
+import stylistic from "@stylistic/eslint-plugin" // eslint将格式化的内容提取到这个包维护了
+import tsEslint from "typescript-eslint" // 比原生的defineConfig更智能
+import vueEslintParser from "vue-eslint-parser" // 解析vue代码
+import pluginVue from "eslint-plugin-vue" // 用于特殊条件（例如本文件中的vue html部分缩进控制）
 
-export default defineConfig([
-	globalIgnores(["node_modules/", "dist/"]),
-	vueTs(),
-	vuePrettier,
-	{
-		files: ["**/*.{js,ts,vue}"],
-		languageOptions: { parser: vueParser, parserOptions: { parser: tsParser, sourceType: "esnext" } },
-		rules: {
-			"@typescript-eslint/ban-ts-comment": 0,
-			"@typescript-eslint/no-array-constructor": 0,
-			"prefer-const": 0,
-			"@typescript-eslint/no-unused-vars": 0,
-			"@typescript-eslint/no-explicit-any": 0
-		}
-	}
-])
+export default tsEslint.config(
+    { ignores: ["node_modules/**", "dist/**", "public/**","format_result.html"] }, // 全局忽略
+	// 没有引入任何其他配置，保证eslint不会执行任何非预期行为
+    {
+        files: ["**/*.{js,ts,vue}"],
+        plugins: {
+            "@stylistic": stylistic,
+            "vue": pluginVue
+        },
+        languageOptions: {
+            parser: vueEslintParser, // 解析vue html
+            parserOptions: {
+                parser: tsEslint.parser, // 解析vue script(ts)
+                ecmaVersion: "latest",
+                sourceType: "module",
+                extraFileExtensions: [".vue"]
+            }
+        },
+        rules: {
+            "@stylistic/indent": ["warn", 4], // 缩进
+            "vue/html-indent": ["warn", 2],
+            "@stylistic/max-len": ["warn", { code: 120, ignoreComments: true, ignoreUrls: true }], // 单行代码长度
+            "@stylistic/semi": ["warn", "never"] // 分号
+        }
+    }
+)
 ```
 
-.prettierrc
-
-```txt
-{
-  "useTabs": true,
-  "tabWidth": 4,
-  "printWidth": 120,
-  "semi": false,
-  "trailingComma": "none",
-  "arrowParens": "avoid"
-}
-```
+需要安装5个开发依赖，除了上方eslint.config.js文件中提到的4个，还有一个`eslint`
