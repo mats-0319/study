@@ -48,7 +48,7 @@ func formatStruct(structureName string, structureItemIns *token.StructureItem, e
 		fieldsStr = "\n"
 	}
 	for _, fieldIns := range structureItemIns.Fields {
-		field := "{{ $indentation }}{{ $fieldName }}: {{ $fieldType_Ts }} = {{ $fieldZeroValue_Ts }};{{ $fieldComment }}\n"
+		field := "{{ $indentation }}{{ $fieldName }}: {{ $fieldType_Ts }} = {{ $fieldZeroValue_Ts }}{{ $fieldComment }}\n"
 		field = strings.ReplaceAll(field, "{{ $fieldName }}", fieldIns.Name)
 		field = strings.ReplaceAll(field, "{{ $fieldType_Ts }}", fieldIns.TSType)
 		field = strings.ReplaceAll(field, "{{ $fieldZeroValue_Ts }}", fieldIns.TSZeroValue)

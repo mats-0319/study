@@ -9,13 +9,12 @@
 - https://github.com/gibbok/typescript-book ：一本简洁的ts手册
 - https://eblog.fly.dev/ginbad.html ：“gin是一个糟糕的软件库”
 - https://www.sophielwang.com/blog/jpeg ：详细介绍jpeg图片格式压缩的原理
+- https://www.youtube.com/watch?v=hJ4S-5MirvU ：一个讲使用go+pg实现outbox模式的视频，我刚和gemini合作实现了该模式
 
 ## 代码/工具
 
-- github.com/dkorunic/betteralign：检测工具，可以检测出能够通过**字段重排序**减少内存占用的结构体
-- github.com/go-drift/drift：使用go语言编写移动端跨平台程序(android/ios)，代码风格和flutter非常像。
-  该项目由个人开发，且处于早期阶段
-- github.com/minio/warp：S3基准测试工具
+- github.com/go-drift/drift：使用go语言编写移动端跨平台程序(android/ios)，代码风格和flutter非常像。该项目由个人开发，且处于早期阶段
 - github.com/aperturerobotics/goscript：将go代码在ast级转换为ts
 - github.com/hajimehoshi/ebiten：go语言2D引擎
 - github.com/templui/templui：一个让人可以使用go语言编写网页的库，内置支持tailwindCss
+- github.com/markel1974/godoom：go语言3d引擎

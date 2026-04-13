@@ -16,11 +16,11 @@ func GenerateConfigFile() {
 
 func formatConfigFile() string {
 	configStr := `
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance } from "axios"
 
 export const axiosWrapper: AxiosInstance = axios.create({
 	baseURL: getBaseUrl(),
-	timeout: 3000
+	timeout: 3000,
 })
 
 // getBaseUrl according to dev/product env & local ipv4 addr, set 'baseURL'
