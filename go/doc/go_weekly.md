@@ -10,6 +10,11 @@
 - https://eblog.fly.dev/ginbad.html ：“gin是一个糟糕的软件库”
 - https://www.sophielwang.com/blog/jpeg ：详细介绍jpeg图片格式压缩的原理
 - https://www.youtube.com/watch?v=hJ4S-5MirvU ：一个讲使用go+pg实现outbox模式的视频，我刚和gemini合作实现了该模式
+- https://medium.com/@m0t9_/lets-add-a-conditional-expression-to-go-language-3eec7783388e ：
+  通过为go语言添加`?:`条件表达式，介绍go语言编译器（词法分析、类型检查等环节）的工作过程和编辑方法
+- https://github.blog/engineering/infrastructure/how-github-uses-ebpf-to-improve-deployment-safety/ ：
+  github的源代码也托管在github上，这篇文章介绍了github如何使用ebpf-go解决循环依赖的问题
+  （举个例子，github无法访问时，github的开发者将无法访问github的源代码）
 
 ## 代码/工具
 

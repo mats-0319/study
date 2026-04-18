@@ -2,7 +2,6 @@
 
 > 本文记录了笔者学习使用git和github的过程。  
 > 推荐一个git图文讲解+实际练习的[网站](https://learngitbranching.js.org/)  
-> [github地址](https://github.com/pcottle/learnGitBranching)
 
 我在日常开发中会使用github-desktop工具和github web，图形化界面不支持的行为再考虑使用git命令行。
 
@@ -100,13 +99,22 @@
 `CURRENT_BRANCH=$(git branch --show-current)`  
 `git checkout --orphan [new-branch]` 创建孤儿分支，该分支与任何现有提交均无关联  
 `git add .`  
-`git commit -m "initialize, clean history"`  
+`git commit -m "Project reboot: clean start without heavy history"`  
 `git branch -D $CURRENT_BRANCH`  
 `git branch -m main`  
 `git push -f origin main`  
 `git for-each-ref --format="%(refname)" refs/original/ | xargs -n 1 git update-ref -d` 删除原始引用备份  
 `git reflog expire --expire=now --all` 清理引用日志  
 `git gc --aggressive --prune=now`  垃圾回收
+
+> 直接删除一个仓库的历史并重建
+
+`rm -rf .git/`
+`git init`
+`git add .`
+`git commit -m "Project reboot: clean start without heavy history"`
+`git remote add origin https://github.com/[user name]/[repo name].git` 具体url格式可以参考项目当前情况
+`git push origin main -f`
 
 ### 比较
 

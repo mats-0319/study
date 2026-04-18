@@ -38,11 +38,11 @@ func TestDisplayColorMethod(t *testing.T) {
 	box1 := make([]string, 0)
 	box2 := make([]string, 0)
 	for i := range str {
-		box1Flag := str[i]&0b01 == 1
+		isOdd := str[i]&0b01 == 1
 
-		t.Logf("char: %c, byte: %b, is odd: %t", str[i], str[i], box1Flag)
+		t.Logf("char: %c, byte: %b, is odd: %t", str[i], str[i], isOdd)
 
-		if box1Flag {
+		if isOdd {
 			box1 = append(box1, string(str[i]))
 		} else {
 			box2 = append(box2, string(str[i]))

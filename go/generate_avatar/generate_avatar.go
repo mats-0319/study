@@ -40,7 +40,6 @@ func GenerateAvatar(text string, size int) error {
 		return err
 	}
 
-	// file name
 	fileName := text
 	if len(fileName) > 8 {
 		fileName = fileName[:8]
