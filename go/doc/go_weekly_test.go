@@ -44,7 +44,6 @@ func TestGoWeekly(t *testing.T) {
 
 		wg.Wait()
 
-		res := counter.Get()
-		t.Log(res)
+		t.Log(counter.Get())
 	}
 }

@@ -50,7 +50,7 @@ func TestDisplayColorMethod(t *testing.T) {
 	}
 
 	// 结论：根据最后一个bit是0或1，决定是否显示颜色的规则，显示颜色的概率为50%，
-	// 即在足够的样本数量下，显示颜色的色块数量约为50%
+	// 即在足够的样本数量下，色块和白块的数量比为1：1
 	t.Logf("box1: %v, box2: %v, box length: %d, %d", box1, box2, len(box1), len(box2))
 
 	//    generate_avatar_test.go:41: char: 0, byte: 110000, is odd: false

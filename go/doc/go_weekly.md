@@ -14,7 +14,10 @@
   通过为go语言添加`?:`条件表达式，介绍go语言编译器（词法分析、类型检查等环节）的工作过程和编辑方法
 - https://github.blog/engineering/infrastructure/how-github-uses-ebpf-to-improve-deployment-safety/ ：
   github的源代码也托管在github上，这篇文章介绍了github如何使用ebpf-go解决循环依赖的问题
-  （举个例子，github无法访问时，github的开发者将无法访问github的源代码）
+  （举个例子，github无法访问时，github的开发者将无法下载和上传github的源代码）
+- https://blog.iamvedant.in/containers-are-not-magic-namespaces-from-scratch ，从零开始创建一个容器，介绍容器技术原理
+- https://anirudhology.com/blog/building-raftly-reproducing-production-failures ，
+  实现一个可控的raft共识，通过删除一个环节来模拟和理解对应环节的作用
 
 ## 代码/工具
 
