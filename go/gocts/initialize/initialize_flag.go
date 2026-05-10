@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/mats9693/study/go/gocts/data"
-	"github.com/mats9693/study/go/gocts/utils"
+	"github.com/mats0319/study/go/gocts/token"
+	"github.com/mats0319/study/go/gocts/utils"
 )
 
 // OnInitialize 实现-i参数：写默认配置文件和go接口文件示例文件(demo)
@@ -15,14 +15,14 @@ func OnInitialize() {
 }
 
 func writeDefaultConfigFile() {
-	content, err := json.Marshal(data.DefaultGeneratorConfig)
+	content, err := json.Marshal(token.DefaultGeneratorConfig)
 	if err != nil {
 		log.Fatalln("json marshal failed, error: ", err)
 	}
 
-	filename := "config.json"
-	backupGenerateFile(filename)
-	utils.WriteFile(data.GeneratorIns.Config.GoDir+filename, content)
+	fileName := "config.json"
+	backupGenerateFile(fileName)
+	utils.WriteFile(token.GeneratorIns.Config.GoDir+fileName, content)
 }
 
 func writeDefaultInitializerFile() {
@@ -31,7 +31,25 @@ func writeDefaultInitializerFile() {
 		log.Fatalln("json marshal failed, error: ", err)
 	}
 
-	filename := "init.json"
-	backupGenerateFile(filename)
-	utils.WriteFile(data.GeneratorIns.Config.GoDir+filename, content)
+	fileName := "init.json"
+	backupGenerateFile(fileName)
+	utils.WriteFile(token.GeneratorIns.Config.GoDir+fileName, content)
+}
+
+var DefaultInitializer = &Initializer{
+	PackageName: "api",
+	Files: []*GoAPIFile{{
+		FileName: "demo",
+		APIList: []*APIItem{{
+			Name: "ListUser",
+			URI:  "/user/list",
+		}, {
+			Name: "CreateUser",
+			URI:  "/user/create",
+		}},
+		EnumList: []*EnumItem{{
+			Name:   "UserIdentify",
+			Number: 3,
+		}},
+	}},
 }

@@ -5,17 +5,18 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"strings"
 )
 
 // WriteFile write 'content' into 'file'
-func WriteFile(filename string, content []byte) {
-	err := os.WriteFile(filename, content, 0777)
+func WriteFile[T string | []byte](fileName string, content T) {
+	err := os.WriteFile(fileName, []byte(content), 0777)
 	if err != nil {
 		log.Fatalln("write file failed, error: ", err)
 	}
 
-	log.Println("Generated file: ", filename)
+	log.Println("Generated file: ", fileName)
 }
 
 // MustSmall make 'str' to small-start camel case, e.g. "Must_small" => "mustSmall"
@@ -105,9 +106,7 @@ func BytesSplit(value []byte, sep ...byte) [][]byte {
 
 	res := make([][]byte, 0)
 	for start, index := 0, 0; index < len(value); index++ {
-		isSep := in(value[index], sep...)
-
-		if !isSep {
+		if !slices.Contains(sep, value[index]) {
 			continue
 		}
 
@@ -123,14 +122,5 @@ func BytesSplit(value []byte, sep ...byte) [][]byte {
 }
 
 func in(value byte, list ...byte) bool {
-	inFlag := false
-
-	for _, b := range list {
-		if b == value {
-			inFlag = true
-			break
-		}
-	}
-
-	return inFlag
+	return slices.Contains(list, value)
 }

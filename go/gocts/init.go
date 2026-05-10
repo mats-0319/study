@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/mats9693/study/go/gocts/data"
-	"github.com/mats9693/study/go/gocts/initialize"
-	"github.com/mats9693/study/go/gocts/utils"
+	"github.com/mats0319/study/go/gocts/initialize"
+	"github.com/mats0319/study/go/gocts/token"
+	"github.com/mats0319/study/go/gocts/utils"
 )
 
 var (
@@ -43,7 +43,7 @@ func init() {
 	}
 
 	// init generator
-	data.GeneratorIns.Initialize(configFile)
+	token.GeneratorIns.Initialize(configFile)
 
 	if initializeFlag {
 		initialize.OnInitialize()
@@ -53,7 +53,7 @@ func init() {
 	if generateGoFlag || len(generateGoFrom) > 0 {
 		initFileName := ""
 		if generateGoFlag {
-			initFileName = data.GeneratorIns.Config.GoDir + "init.json"
+			initFileName = token.GeneratorIns.Config.GoDir + "init.json"
 		} else {
 			initFileName = generateGoFrom
 		}

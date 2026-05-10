@@ -3,15 +3,15 @@ package main
 import (
 	"log"
 
-	"github.com/mats9693/study/go/gocts/generate"
-	"github.com/mats9693/study/go/gocts/parse"
+	"github.com/mats0319/study/go/gocts/printer"
+	"github.com/mats0319/study/go/gocts/scanner"
 )
 
 func main() {
-	log.Println("> Gocts: Start.")
-	defer log.Println("> Gocts: Finish.")
+	log.Println("> Gocts: Start...")
+	defer log.Println("> Gocts: Done.")
 
-	parse.TraversalDir()
+	scanner.TraversalDir()
 
 	gen.GenerateConfigFile()
 	gen.GenerateRequestFiles()

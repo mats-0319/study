@@ -7,7 +7,7 @@ import (
 
 func TestGenerateUUID(t *testing.T) {
 	for range 5 {
-		fmt.Println(New[string]("user server"))
+		fmt.Println(NewV4[string]("user server"))
 	}
 }
 
@@ -28,7 +28,7 @@ func TestGenerateUUIDByDesignatedText(t *testing.T) {
 	}
 
 	for i := range text {
-		uid := New(text[i])
+		uid := NewV4(text[i])
 		if uid != expectedUID[i] {
 			t.Logf("%s uid generate failed.\nget     : %s\nexpected: %s\n", text[i], uid, expectedUID)
 			t.Fail()
