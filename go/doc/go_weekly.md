@@ -18,6 +18,10 @@
 - https://blog.iamvedant.in/containers-are-not-magic-namespaces-from-scratch ，从零开始创建一个容器，介绍容器技术原理
 - https://anirudhology.com/blog/building-raftly-reproducing-production-failures ，
   实现一个可控的raft共识，通过删除一个环节来模拟和理解对应环节的作用
+- https://corrode.dev/learn/migration-guides/go-to-rust/ ，一篇go和rust的对比文章
+- https://www.alexedwards.net/blog/go-experiments-explained ，go实验性功能，它们可能默认开启或关闭、正在推进加入正式版本或已搁置
+- https://segflow.github.io/post/fast-file-search-go/ ，流处理的优化过程，将基础代码（加载到内存然后按byte读取）的效率一路提高到66倍
+- https://zackoverflow.dev/writing/why-does-tsgo-use-so-much-memory ，介绍ts的新编译器tsgo为什么占用这么多内存
 
 ## 代码/工具
 
@@ -27,3 +31,4 @@
 - github.com/templui/templui：一个让人可以使用go语言编写网页的库，内置支持tailwindCss
 - github.com/markel1974/godoom：go语言3d引擎
 - github.com/six-ddc/plow:http基准测试工具
+- github.com/gookit/validate:通用验证器和过滤器
