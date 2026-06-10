@@ -1,5 +1,39 @@
 # go小知识
 
+## 编译时常量与命令行启动参数
+
+### 编译时常量
+
+``` go
+//go:build !release
+
+package tag
+
+const IsDebug = true
+```
+
+编译时提供，编译出的二进制文件享受编译器优化
+
+- 编译优化：`if tag.IsDebug {}`，在前面这段代码中，如果值为false，则二进制文件中不包含该if的代码块
+- 条件编译按文件有效
+
+### 命令行启动参数
+
+``` go 
+package flags
+
+import "flag"
+
+var IsTestMode bool
+
+func init() {
+	flag.BoolVar(&IsTestMode, "t", false, "test mode flag")
+	flag.Parse()
+}
+```
+
+程序启动时提供，使用相同的二进制文件，类似从配置文件读配置
+
 ## 时间类型(`time.Duration`)
 
 ``` 
@@ -29,7 +63,7 @@ fmt.Println(len(nums3))
 2. append函数，如果两个输入参数类型不一致，会在编译期间报错，错误提示见前文
 
 如果append的可变参数写成：`1,2,3`，函数内看到的可变参数，是这几个元素组成的新的slice，
-可以被推断为`[]interface{}`类型，不会报错  
+可以被推断为`[]interface{}`类型，不会报错
 
 但像题目中的写法，函数内看到的可变参数，与函数外一致，是有类型的([]int)，所以会报错
 
