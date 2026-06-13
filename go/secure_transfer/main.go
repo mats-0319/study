@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"log"
 	"os"
 	"regexp"
 	"strings"
@@ -18,8 +17,6 @@ const (
 )
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-
 	start()
 }
 

@@ -19,7 +19,7 @@ mkdir -p "./build"
 
     IFS='/' read -r goos goarch <<< "$platform"
 
-    local fileName="transmission-${goos}-${goarch}"
+    local fileName="transfer-${goos}-${goarch}"
     if [ "$goos" = "windows" ]; then
       fileName="$fileName.exe"
     fi
@@ -36,7 +36,7 @@ compile_exec "windows/amd64"
 compile_exec "linux/amd64"
 compile_exec "linux/arm64"
 
-cp "./manual.md" "./build/manual.md"
+cp "./doc/manual.md" "./build/manual.md"
 sed -i "3i\> Build Time: \\$(date)\n> Go Version: \\$(go version)\n" "./build/manual.md"
 
 # back to from path
