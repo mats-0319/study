@@ -1,5 +1,37 @@
 # go小知识
 
+## go的标识符可见性：protected
+
+go通常使用首字母大小写控制标识符可见性，但还有一条控制规则：internal文件夹
+
+- 这条规则并非go语言规范的一部分，而是go工具链强制执行的
+- 标识符：包括常量、变量、类型、函数、方法
+- 规则：假设一个模块有一个internal文件夹，那么：
+    - 该模块以外无法访问internal文件夹
+    - 该模块内，internal文件夹的父文件夹以外，无法访问internal文件夹
+  ```text
+  module_1
+  - go.mod
+  - main.go // &#10006;
+  
+  module_2
+  - go.mod
+  - main.go // &#10006;
+  - level_1
+      - main.go // &#10006;
+      - level_2
+          - main.go // &#10004;
+          - external
+              - external.go // &#10004;
+          - internal
+              - internal.go // define: PublicVar
+  
+  &#10004;：允许使用`internal.PublicVar`
+  &#10006;：不允许使用`internal.PublicVar`
+  ```
+- 错误信息：在编译时，提示import对应行出错，错误描述为**不允许使用internal包**
+  （这里用词是`package`，但实际上与包名无关，而是指文件夹名称）
+
 ## 编译时常量与命令行启动参数
 
 ### 编译时常量
