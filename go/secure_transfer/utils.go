@@ -9,15 +9,15 @@ import (
 )
 
 func Success(behavior string) {
-	log.Printf("> %s success.\n", behavior)
+	log.Printf("> %s success.\n\n", behavior)
 }
 
 func Info(behavior string) {
-	log.Printf("> %s .\n", behavior)
+	log.Printf("> %s\n", behavior)
 }
 
 func Error(behavior string, err error) {
-	log.Printf("> %s failed, error: %v\n", behavior, err)
+	log.Printf("> %s failed, error: %v\n\n", behavior, err)
 }
 
 func encodeCipherFile(pubKeyBytes []byte, ciphertext []byte) []byte {

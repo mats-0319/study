@@ -25,7 +25,7 @@ func start() {
 
 ALL:
 	for {
-		Info("Enter Your Command ('h' for help)")
+		Info("Enter Your Command ('h' for help) .")
 
 		if !scanner.Scan() {
 			break
@@ -34,21 +34,21 @@ ALL:
 		text := strings.TrimSpace(scanner.Text())
 		matched := regexp.MustCompile(`(\w+)`).FindString(strings.ToLower(text))
 		switch matched {
-		case "h", "help":
+		case "h", "help", "0":
 			printHelp()
-		case "g", "gen", "generate":
+		case "g", "gen", "generate", "1":
 			generateKeypair()
-		case "i", "init", "initialize":
+		case "i", "init", "initialize", "2":
 			initMessageFile()
-		case "e", "encrypt":
+		case "e", "encrypt", "3":
 			encrypt()
-		case "d", "decrypt":
+		case "d", "decrypt", "4":
 			decrypt()
-		case "exit":
-			Info("Exit")
+		case "exit", "9":
+			Info("Exit.")
 			break ALL
 		default:
-			Info("Unknown input: " + text + ", 'h' for help")
+			Info("Unknown input: " + text + ", 'h' for help.")
 		}
 	}
 }
@@ -64,15 +64,21 @@ func initMessageFile() {
 }
 
 func printHelp() {
-	Info(`Options:
-  - h: this help
+	Info(`
+Brief: (number)
+  - [1]: generate key pair
+  - [2]: initialize message file
+  - [3]: encrypt
+  - [4]: decrypt
+  - [0]: help
+  - [9]: exit
+
+Options:
+  - h help: this help
   - g: generate public & private key into files ('./priv.key' & './PUB.KEY')
   - i: initialize message file './message.txt'
   - e: encrypt plain text from './message.xxx' and write cipher to './CIPHER.XXX'
   - d: decrypt cipher from './CIPHER.XXX' and write plain text to './message_decrypted.xxx'
   - exit: exit program
-
-note: encrypt/decrypt support automatic recognize 'file extension', in fact: 
-when encrypt, we find first file which name matched 'message.[xxx]' and encrypt it into 'CIPHER.[XXX]';
-when decrypt, we find first file which name matched 'CIPHER.[XXX]' and decrypt it into 'message_decrypted.[xxx]'`)
+`)
 }
