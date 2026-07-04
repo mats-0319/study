@@ -4,6 +4,7 @@ from_path=$(pwd) # record current path
 
 # change dir, for run this script from anywhere
 cd "$(dirname "$0")" || exit 1
+cd .. || exit 1
 
 # clean history build folder
 if [ -d "./build/" ]; then
@@ -36,7 +37,7 @@ compile_exec "windows/amd64"
 compile_exec "linux/amd64"
 compile_exec "linux/arm64"
 
-cp "./doc/manual.md" "./build/manual.md"
+cp "./script/manual.md" "./build/manual.md"
 sed -i "3i\> Build Time: \\$(date)\n> Go Version: \\$(go version)\n" "./build/manual.md"
 
 # back to from path

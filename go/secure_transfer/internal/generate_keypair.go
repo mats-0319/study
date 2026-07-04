@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"crypto/ecdh"
@@ -7,19 +7,19 @@ import (
 	"os"
 )
 
-func generateKeypair() {
-	privKey, err := generatePrivateKey()
+func GenerateKeypair() {
+	privKey, err := Curve().GenerateKey(nil)
 	if err != nil {
 		Error("Generate private key", err)
 		return
 	}
 
-	err = savePrivateKey(privKey)
+	err = serializePrivateKey(privKey)
 	if err != nil {
 		return
 	}
 
-	err = savePublicKey(privKey.PublicKey())
+	err = serializePublicKey(privKey.PublicKey())
 	if err != nil {
 		return
 	}
@@ -27,7 +27,7 @@ func generateKeypair() {
 	Success("Generate key pair")
 }
 
-func savePrivateKey(privKey *ecdh.PrivateKey) error {
+func serializePrivateKey(privKey *ecdh.PrivateKey) error {
 	privKeyBytes, err := x509.MarshalPKCS8PrivateKey(privKey)
 	if err != nil {
 		Error("Marshal private key", err)
@@ -46,7 +46,7 @@ func savePrivateKey(privKey *ecdh.PrivateKey) error {
 	return nil
 }
 
-func savePublicKey(pubKey *ecdh.PublicKey) error {
+func serializePublicKey(pubKey *ecdh.PublicKey) error {
 	pubKeyBytes, err := x509.MarshalPKIXPublicKey(pubKey)
 	if err != nil {
 		Error("Marshal public key", err)
