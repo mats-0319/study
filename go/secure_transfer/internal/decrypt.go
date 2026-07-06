@@ -99,8 +99,8 @@ func decryptConsultation(privKey *ecdh.PrivateKey, pubKeyFileBytes []byte) (aesK
 		return
 	}
 
-	pubKeyBytes := pubKeyFileBytes[1 : publicKeyLength+1]
-	ciphertext = pubKeyFileBytes[publicKeyLength+1:]
+	pubKeyBytes := pubKeyFileBytes[1 : 1+publicKeyLength]
+	ciphertext = pubKeyFileBytes[1+publicKeyLength:]
 
 	pubKey, err := Curve().NewPublicKey(pubKeyBytes)
 	if err != nil {

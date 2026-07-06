@@ -87,7 +87,7 @@ func encrypt(pubKey *ecdh.PublicKey, content []byte) []byte {
 
 	result := make([]byte, 1+len(pubKeyBytes)+len(ciphertext))
 	copy(result[:1], []byte{byte(len(pubKeyBytes))})
-	copy(result[1:len(pubKeyBytes)+1], pubKeyBytes)
+	copy(result[1:1+len(pubKeyBytes)], pubKeyBytes)
 	copy(result[1+len(pubKeyBytes):], ciphertext)
 
 	return result
