@@ -23,6 +23,10 @@
 - https://zackoverflow.dev/writing/why-does-tsgo-use-so-much-memory ，介绍ts的新编译器tsgo为什么占用这么多内存
 - https://internals-for-interns.com/posts/the-go-lexer/ ，理解go编译器（系列文章）
 - https://internals-for-interns.com/posts/understanding-go-runtime/ ，理解go运行时（系列文章）
+- https://spf13.com/p/go-the-agentic-language/， 从ts7编译器用go改写开始讲起，主要介绍了AI写代码go/rust代码的对比
+- https://postgresisenough.dev/， 一个介绍如何使用pg实现*通常通过引入其他系统实现的*功能的网站，
+  例如全文检索(elasticsearch)、缓存(redis)、文档存储(mongoDB)... pg有这些内容的处理方案，但问题在方案之外：
+  如果一个功能相对边缘化，则可以尝试使用pg；如果一个功能是核心或者有性能要求，则应考虑专门的系统
 
 ## 代码/工具
 
@@ -31,5 +35,5 @@
 - github.com/hajimehoshi/ebiten：go语言2D引擎
 - github.com/templui/templui：一个让人可以使用go语言编写网页的库，内置支持tailwindCss
 - github.com/markel1974/godoom：go语言3d引擎
-- github.com/six-ddc/plow:http基准测试工具
-- github.com/gookit/validate:通用验证器和过滤器
+- github.com/six-ddc/plow: http基准测试工具
+- github.com/gookit/validate: 通用验证器和过滤器

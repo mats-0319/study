@@ -1,5 +1,8 @@
 # flutter
 
+[flutter doc](https://docs.flutter.cn/install/quick)
+[flutter实战](https://book.flutterchina.club)
+
 ## 打包和安装
 
 `flutter build appbundle`
