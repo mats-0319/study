@@ -76,3 +76,4 @@
 - 建库，可用资源移动
 - go代码调整go.mod module名称，与新的组织结构一致
 - 调整文字材料：Readme.md
+- android项目重新创建
