@@ -881,7 +881,7 @@ where
 `cargo test`
 `cargo test [func name]` // 测试单个函数，函数名可以只是片段
 `cargo test -- --test-threads=1` // 取消并发，只使用一个线程执行测试
-`cargo test -- --ignored` // 只运行正常测试时会被忽略的函数
+`cargo test -- --ignored` // 只运行正常测试期间会被忽略的函数
 `cargo test -- --include-ignored` // 运行全部测试
 
 ```rust
@@ -900,5 +900,37 @@ mod tests {
         let result = add(2, 2);
         assert_eq!(result, 4);
     }
+}
+```
+
+## 迭代器与闭包 Iterators and Closures
+
+闭包可以简单的理解成不具名函数，同时闭包可以直接访问定义位置的其他值
+
+迭代器：遍历一个序列中的每个元素，对其执行某些操作
+
+- 遍历由程序控制，程序员只需要编写想要执行的操作
+- 可以执行的操作包括提前终止遍历
+
+迭代器和for循环做几乎一样的事情，使用迭代器几乎不会有性能损失，比起写for循环，迭代器不用创建新的变量并复制数据
+
+使用迭代器可以使代码量更少、重点更突出，但是要求程序员对所有权有足够的了解
+
+## cargo高级功能
+
+略（我们只是写一个rust加解密工具，不需要把rust代码发布给rust收录，也不需要使用工作空间来组织代码结构等）
+
+## 智能指针 Smart Pointer
+
+```rust
+enum List {
+    Cons(i32, Box<List>),
+    Nil,
+}
+
+use crate::List::{Cons, Nil};
+
+fn main() {
+    let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
 }
 ```

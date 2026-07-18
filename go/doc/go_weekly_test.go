@@ -5,6 +5,9 @@ import (
 	"testing"
 )
 
+// this is a 'quote' test, double "quote"
+// and `anti-quote`
+
 type Locked[T any] struct {
 	mu sync.Mutex
 	v  T
