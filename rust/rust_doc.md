@@ -934,3 +934,26 @@ fn main() {
     let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
 }
 ```
+
+## 并发 Concurrency
+
+```rust 
+use std::sync::mpsc;
+use std::thread;
+
+fn main() {
+    let (tx, rx) = mpsc::channel();
+
+    thread::spawn(move || {
+        let val = String::from("hi");
+        tx.send(val).unwrap();
+    });
+
+    let received = rx.recv().unwrap();
+    println!("Got: {received}");
+}
+```
+
+## 异步与多线程 Async Await Future and Stream
+
+## 面向对象编程特性 Object-Oriented Programming

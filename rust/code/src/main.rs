@@ -10,37 +10,36 @@ fn practice() {
 
 fn demo() {
     // guess_number::guess_number();
-    grep::grep();
+    // grep::grep();
 }
 
-struct MyBox<T>(T);
+async fn page_title(url: &str) -> (&str, Option<String>) {
+    let response_text = trpl::get(url).await.text().await;
+    let title = Html::parse(&response_text)
+        .select_first("title")
+        .map(|title| title.inner_html());
 
-impl<T> MyBox<T> {
-    fn new(x: T) -> MyBox<T> {
-        MyBox(x)
-    }
+    (url, title)
 }
 
-use std::ops::Deref;
-
-impl<T> Deref for MyBox<T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-fn hello(name: &str) {
-    println!("Hello, {name}!");
-}
+use trpl::{Either, Html};
 
 fn main() {
-    // practice();
-    // demo();
+    let args: Vec<String> = std::env::args().collect();
 
-    let a = 5;
-    let b = MyBox::new(String::from("Rust"));
+    trpl::block_on(async {
+        let title_fut_1 = page_title(&args[1]);
+        let title_fut_2 = page_title(&args[2]);
 
-    hello(&b);
+        let (url, maybe_title) = match trpl::select(title_fut_1, title_fut_2).await {
+            Either::Left(left) => left,
+            Either::Right(right) => right,
+        };
+
+        println!("{url} returned first");
+        match maybe_title {
+            Some(title) => println!("Its page title was: '{title}'"),
+            None => println!("It had no title."),
+        }
+    })
 }

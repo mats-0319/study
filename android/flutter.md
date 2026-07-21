@@ -4,19 +4,6 @@
 [flutter实战](https://book.flutterchina.club)
 [flutter codelab](https://codelabs.developers.google.com/codelabs/flutter-codelab-first?hl=zh-cn#0)
 
-## 思考：Android开发使用flutter还是kotlin
-
-对比下来，flutter的优势：
-
-- （初学者）写起来更快，dart语言比kotlin复杂度低
-- 内置基本样式
-- 跨平台
-
-劣势：
-
-- 性能差：flutter需要翻译一遍，kotlin直接就是android原生
-- 原生功能缺失：dart没有办法调一些android原生功能，例如adb
-
 ## 常用命令
 
 - `flutter build appbundle`
