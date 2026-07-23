@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-func Decrypt() {
+func Decrypt() (isSuccess bool) {
 	privKey := deserializePrivateKey()
 	if privKey == nil {
 		return
@@ -39,6 +39,8 @@ func Decrypt() {
 	}
 
 	Success("Decrypt")
+
+	return true
 }
 
 func deserializePrivateKey() *ecdh.PrivateKey {

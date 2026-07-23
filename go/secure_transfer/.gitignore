@@ -1,3 +1,7 @@
-build
-sample/secure_transfer
-sample/secure_transfer.exe
+cmd/cli/build/
+# build name in .run
+cmd/cli/sample/secure_transfer_cli
+cmd/cli/sample/secure_transfer_cli.exe
+
+cmd/gui/sample/secure_transfer_gui
+cmd/gui/sample/secure_transfer_gui.exe

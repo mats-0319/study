@@ -957,3 +957,30 @@ fn main() {
 ## 异步与多线程 Async Await Future and Stream
 
 ## 面向对象编程特性 Object-Oriented Programming
+
+```rust
+pub trait Draw {
+    fn draw(&self);
+}
+
+// 以下两种定义都支持任意实现trait的类型
+
+pub struct Screen {
+  pub components: Vec<Box<dyn Draw>>, // vec元素之间的类型可以不同
+}
+
+pub struct Screen<T: Draw> {
+  pub components: Vec<T>, // 编译期间会单态化，例如可能编译成`Vec<Button>`或`Vec<Image>`等，元素类型相同
+}
+```
+
+## 模式与匹配 pattern
+
+所有可以使用模式的位置：
+- match / if let
+- let 
+- while let
+- for
+- 函数参数
+
+## 高级特性

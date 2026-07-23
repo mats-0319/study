@@ -17,6 +17,21 @@ go语言的依赖管理工具
 - `go mod tidy`：整理、下载依赖
 - `go mod download`：下载依赖
 
+## Tips
+
+go module是按照导入包 (package)构建依赖图的，而不是目录。 所以即使在一个module中，使用一个入口编译不会下载它没有导入的依赖。
+
+举个例子，假设有一个项目的结构如下：
+
+```目录结构
+- cli/     # 无外部依赖引用
+- gui/     # 引用了外部依赖：a
+- internal/
+- go.mod
+```
+
+此时执行`go install xxx/cli`，不会下载gui引入的外部依赖a
+
 ## go.mod 文件结构
 
 module path和go版本信息为必要项，其他可选
@@ -81,9 +96,9 @@ retract (
 - 版本后缀`@none`表示删除依赖
 - 若不提供版本信息，则使用最后一个tag、发布 (release)版本或最新的提交（优先级从前往后依次降低）
 
-## 工作区 go.work
+## 工作空间 workspace go.work
 
-一个轻量级的工作空间，让多个module能够像一个项目一样协同开发，而不需要使用replace
+轻量级的工作空间，让多个module能够像一个项目一样协同开发，而不需要使用replace
 
 它只是标记一组module，开发期间这些module优先使用本地代码（本地模块互相引用）
 
@@ -93,6 +108,14 @@ retract (
 
 - `go work init [moddirs]`：初始化
 - `go work sync`：将工作区的构建列表同步回工作区的模块 (?)
+
+### Tips
+
+workspace与module更像是并行的两条线、从属关系不强
+
+举个例子，在本地新创建的workspace（此时还没有远程仓库），无法使用`go mod tidy`、可以正常`go build`
+
+- 因为`go mod tidy`的目的是维护一个可用的`go.mod`，它不能假设每一个module都有workspace
 
 # 扩展：go语言推荐的版本号格式与约定
 

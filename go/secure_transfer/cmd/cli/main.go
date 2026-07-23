@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/mats0319/study/go/transmission/internal"
+	"github.com/mats0319/secure_transfer/internal"
 )
 
 func main() {
@@ -25,6 +25,7 @@ ALL:
 		}
 
 		text := strings.TrimSpace(scanner.Text())
+		// 匹配第一个字符串，大小写不敏感 (== [0-9A-Za-z_])
 		matched := regexp.MustCompile(`(\w+)`).FindString(strings.ToLower(text))
 		switch matched {
 		case "h", "help":
@@ -34,9 +35,9 @@ ALL:
 		case "i", "init", "initialize":
 			internal.InitMessageFile()
 		case "e", "encrypt":
-			internal.Encrypt()
+			_ = internal.Encrypt()
 		case "d", "decrypt":
-			internal.Decrypt()
+			_ = internal.Decrypt()
 		case "exit", "q":
 			internal.Info("Exit.")
 			break ALL

@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-func Encrypt() {
+func Encrypt() (isSuccess bool) {
 	pubKey := deserializePublicKey()
 	if pubKey == nil {
 		return
@@ -38,6 +38,8 @@ func Encrypt() {
 	}
 
 	Success("Encrypt")
+
+	return true
 }
 
 func deserializePublicKey() *ecdh.PublicKey {

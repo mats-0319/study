@@ -31,11 +31,10 @@ mkdir -p "./build"
     sha1sum "$filePath" | cut -d" " -f1 > "$filePath.sha1"
   }
 
-go mod tidy
+go mod tidy # 这么做其实会下载全部依赖，所以该脚本仅供参考
 
 compile_exec "windows/amd64"
 compile_exec "linux/amd64"
-compile_exec "linux/arm64"
 
 cp "./script/manual.md" "./build/manual.md"
 sed -i "3i\> Build Time: \\$(date)\n> Go Version: \\$(go version)\n" "./build/manual.md"
