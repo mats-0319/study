@@ -1,8 +1,6 @@
 package components
 
 import (
-	"image/color"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
@@ -14,35 +12,35 @@ func Content() fyne.CanvasObject {
 
 	var left *container.Split
 	{
-		background := canvas.NewRectangle(color.White)
+		background := canvas.NewRectangle(color_MainDark)
 		background.SetMinSize(fyne.NewSquareSize(200))
 
-		var sender *fyne.Container
+		var senderEntry *fyne.Container
 		{
-			senderContent := Sender()
-			displayContent.Add(senderContent) // default
+			senderContent := makeSenderContent()
+			displayContent.Add(senderContent) // set default
 
 			senderButton := widget.NewButton("Sender", func() {
 				displayContent.Objects = []fyne.CanvasObject{senderContent}
 				displayContent.Refresh()
 			})
 
-			sender = container.NewStack(background, container.NewCenter(senderButton))
+			senderEntry = container.NewStack(background, container.NewCenter(senderButton))
 		}
 
-		var receiver *fyne.Container
+		var receiverEntry *fyne.Container
 		{
-			receiverContent := Receiver()
+			receiverContent := makeReceiverContent()
 
 			receiverButton := widget.NewButton("Receiver", func() {
 				displayContent.Objects = []fyne.CanvasObject{receiverContent}
 				displayContent.Refresh()
 			})
 
-			receiver = container.NewStack(background, container.NewCenter(receiverButton))
+			receiverEntry = container.NewStack(background, container.NewCenter(receiverButton))
 		}
 
-		left = container.NewVSplit(sender, receiver)
+		left = container.NewVSplit(senderEntry, receiverEntry)
 		left.SetOffset(0.5)
 	}
 

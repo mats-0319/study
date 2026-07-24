@@ -3,5 +3,6 @@ cmd/cli/build/
 cmd/cli/sample/secure_transfer_cli
 cmd/cli/sample/secure_transfer_cli.exe
 
+cmd/gui/build/
 cmd/gui/sample/secure_transfer_gui
 cmd/gui/sample/secure_transfer_gui.exe
