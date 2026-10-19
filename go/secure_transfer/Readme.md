@@ -46,16 +46,26 @@ fyne依赖cgo，如果编译环境和你的系统的glibc版本不兼容，则�
 
 ## 测试
 
-代码在`test/`，包括一次性加密和流式加密的功能测试与基准测试，以下是基准测试结果：
+常用命令：
 
 ```cmd
-$ go test -bench=. -benchmem  # 同时执行普通测试，保证功能正确性
-goos: linux
+go test ./test/ -v                                   # 功能测试
+go test ./test/ -race                                # 竞态检查
+go test ./test/ -run '^$' -bench . -benchtime 1s     # 只跑基准
+```
+
+基准测试执行结果：
+
+```cmd
+$ go test .\test\ -run '^$' -bench . -benchtime 1s
+                  不执行常规测试        每个基准测试至少运行1s
+                            执行所有基准测试
+goos: windows
 goarch: amd64
 pkg: github.com/mats0319/secure_transfer/test
-cpu: AMD Ryzen 7 7700 8-Core Processor              
-BenchmarkEncryptSameFile/Encrypt_Once-16                       1        1338428994 ns/op        2147507752 B/op       41 allocs/op
-BenchmarkEncryptSameFile/Encrypt_Stream-16                     2         634281066 ns/op        3249607472 B/op     5207 allocs/op
-PASS
-ok      github.com/mats0319/secure_transfer/test        6.276s
+cpu: AMD Ryzen 7 7700 8-Core Processor 
+BenchmarkEncrypt/once/8MiB-16        268     4380662 ns/op     1914.92 MB/s    16800051 B/op      43 allocs/op
+BenchmarkEncrypt/stream/8MiB-16      685     1896901 ns/op     4422.27 MB/s       15237 B/op      96 allocs/op
+                                     迭代次数  每次操作平均用时                     每次操作平均分配内存  每次操作平均分配对象
+                                                               吞吐量（来自-benchmem)           
 ```

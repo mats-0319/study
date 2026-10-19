@@ -169,6 +169,13 @@ func readFileHeader(reader io.Reader) (fileHeaderBytes []byte, e *utils.Error) {
 	if e != nil {
 		return
 	}
+	if len(fileHeaderLen) < 1 {
+		// 空文件：readExact 读到 EOF 且不视为错误，这里必须显式拒绝，
+		// 否则下面索引 fileHeaderLen[0] 会越界 panic
+		e = utils.ErrFileHeader().WithParam("length flag", "empty file")
+		mlog.Error(e.String())
+		return
+	}
 	if fileHeaderLen[0] != utils.FileHeaderLength {
 		e = utils.ErrFileHeader().
 			WithParam("length flag", fileHeaderLen[0]).
