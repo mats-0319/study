@@ -12,15 +12,18 @@ type frame struct {
 	index       int32
 	isLastFrame bool
 	data        []byte
-	e           *utils.Error
+	// buf 是 data 的底层池化缓冲，用于把缓冲归还池中；
+	// 为 nil 表示该帧没有占用池化缓冲（例如只承载错误的帧）。
+	buf *[]byte
+	e   *utils.Error
 }
 
 func (f *frame) serialize() {
-	if len(f.data) < 9+utils.GCMTagLength {
+	if len(f.data) < frameHdrLen+utils.GCMTagLength {
 		panic("serialize: frame payload not produced by Seal with 9-byte prefix")
 	}
 
-	var fixed [9]byte
+	var fixed [frameHdrLen]byte
 	if f.isLastFrame {
 		fixed[0] = 1
 	} else {
@@ -34,24 +37,23 @@ func (f *frame) serialize() {
 	fixed[4] = byte(f.index)
 
 	// payload
-	length := int32(len(f.data) - 9)
+	length := int32(len(f.data) - frameHdrLen)
 	fixed[5] = byte(length >> 24)
 	fixed[6] = byte(length >> 16)
 	fixed[7] = byte(length >> 8)
 	fixed[8] = byte(length)
 
-	copy(f.data[:9], fixed[:])
-
-	return
+	copy(f.data[:frameHdrLen], fixed[:])
 }
 
 func (f *frame) deserialize(reader io.Reader, index int) (e *utils.Error) {
-	fixed, e := readExact(reader, 9)
+	var fixed [frameHdrLen]byte
+	n, e := readExactInto(reader, fixed[:])
 	if e != nil {
 		return
 	}
-	if len(fixed) < 9 {
-		e = utils.ErrFrame().WithParam("length", len(fixed)).WithParam("want", 9)
+	if n < len(fixed) {
+		e = utils.ErrFrame().WithParam("length", n).WithParam("want", len(fixed))
 		mlog.Error(e.String())
 		return
 	}
@@ -81,17 +83,23 @@ func (f *frame) deserialize(reader io.Reader, index int) (e *utils.Error) {
 		return
 	}
 
-	data, e := readExact(reader, int(length))
+	// 密文直接读进池化缓冲：大文件下避免「每帧一次约 1MB」的分配
+	if f.buf == nil {
+		f.buf = getFrameBuf()
+	}
+
+	payload := (*f.buf)[:int(length)]
+	n, e = readExactInto(reader, payload)
 	if e != nil {
 		return
 	}
-	if len(data) != int(length) {
-		e = utils.ErrFrame().WithParam("length", len(data)).WithParam("want", length)
+	if n != len(payload) {
+		e = utils.ErrFrame().WithParam("length", n).WithParam("want", length)
 		mlog.Error(e.String())
 		return
 	}
 
-	f.data = data
+	f.data = payload
 
 	return
 }

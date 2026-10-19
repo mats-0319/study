@@ -3,7 +3,6 @@ package lib
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"io"
 	"os"
 
@@ -189,29 +188,6 @@ func readFileHeader(reader io.Reader) (fileHeaderBytes []byte, e *utils.Error) {
 		mlog.Error(e.String())
 		return
 	}
-
-	return
-}
-
-func readExact(reader io.Reader, length int) (res []byte, e *utils.Error) {
-	res = make([]byte, length)
-	total := 0
-	for total < length { // io.Reader.Read一次可能只读一部分，添加循环保证读到足够数量或者读完
-		n, err := reader.Read(res[total:])
-		total += n
-		if err != nil {
-			res = res[:total]
-
-			if !errors.Is(err, io.EOF) { // 读完了不视为错误，正常返回已读内容
-				e = utils.ErrReadExact().WithCause(err)
-				mlog.Error(e.String())
-			}
-
-			return
-		}
-	}
-
-	res = res[:total]
 
 	return
 }

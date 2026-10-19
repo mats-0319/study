@@ -134,19 +134,26 @@ func (enc *encryptorStream) read(ctx context.Context, ch chan *frame, originFile
 		case <-ctx.Done():
 			return
 		default:
-			originFrame, e := readExact(file, utils.FrameSize)
+			frameIns := newPooledFrame()
+
+			// 明文直接读进池化缓冲：大文件下避免「每帧一次约 1MB」的分配
+			n, e := readExactInto(file, (*frameIns.buf)[:utils.FrameSize])
 			if e != nil {
+				frameIns.releaseBuf()
 				sendChanWithExit(ctx, ch, &frame{e: e})
 				return
 			}
 
-			isLastFrame := len(originFrame) < utils.FrameSize
+			isLastFrame := n < utils.FrameSize
 
-			sendChanWithExit(ctx, ch, &frame{
-				index:       counter,
-				isLastFrame: isLastFrame,
-				data:        originFrame,
-			})
+			frameIns.index = counter
+			frameIns.isLastFrame = isLastFrame
+			frameIns.data = (*frameIns.buf)[:n]
+
+			if !sendChanWithExit(ctx, ch, frameIns) {
+				frameIns.releaseBuf() // ctx 已取消、帧被丢弃，缓冲必须归还
+				return
+			}
 
 			if isLastFrame {
 				return
@@ -174,12 +181,18 @@ func (enc *encryptorStream) encrypt(ctx context.Context, originFrameCh chan *fra
 				return
 			}
 
-			dst := make([]byte, 9, 9+len(frameIns.data)+utils.GCMTagLength)
 			nonce := makeNonce(enc.fileHeader.BaseNonce, frameIns.isLastFrame, frameIns.index)
 
-			frameIns.data = enc.aesGCM.Seal(dst, nonce, frameIns.data, enc.fileHeader.AAD)
+			// 密文需要 9 字节帧头前缀，而 GCM 要求 dst 不与明文重叠，
+			// 所以另取一块池化缓冲作为输出，并把明文缓冲归还
+			out := getFrameBuf()
+			frameIns.data = enc.aesGCM.Seal((*out)[:frameHdrLen], nonce, frameIns.data, enc.fileHeader.AAD)
+			frameIns.takeBuf(out)
 
-			sendChanWithExit(ctx, encryptedFrameCh, frameIns)
+			if !sendChanWithExit(ctx, encryptedFrameCh, frameIns) {
+				frameIns.releaseBuf() // ctx 已取消、帧被丢弃，缓冲必须归还
+				return
+			}
 		}
 	}
 }
@@ -230,6 +243,8 @@ ALL:
 			for frameIns != nil && frameIns.index == writeIndex {
 				frameIns.serialize()
 				_, err := writer.Write(frameIns.data)
+				frameIns.releaseBuf() // 已写入文件，缓冲可以归还池中
+
 				if err != nil {
 					e = utils.ErrWriteEncFile().WithCause(err)
 					mlog.Error(e.String())
@@ -254,11 +269,14 @@ ALL:
 	return
 }
 
-func sendChanWithExit(ctx context.Context, ch chan *frame, frameIns *frame) {
+// sendChanWithExit 把帧送入 ch；ctx 已取消时丢弃该帧并返回 false。
+// 返回 false 时调用方必须归还该帧持有的缓冲。
+func sendChanWithExit(ctx context.Context, ch chan *frame, frameIns *frame) bool {
 	select {
 	case <-ctx.Done():
 		// 如果不加这个分支，则在channel缓冲区满时，即使关闭channel，已经阻塞的goroutine会一直阻塞下去
-		return
+		return false
 	case ch <- frameIns:
+		return true
 	}
 }

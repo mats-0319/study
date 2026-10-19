@@ -133,12 +133,19 @@ func (dec *decryptorStream) read(ctx context.Context, ch chan *frame, encFile st
 
 			e = frameIns.deserialize(file, index)
 			if e != nil {
+				frameIns.releaseBuf()
 				sendChanWithExit(ctx, ch, &frame{e: e})
 				return
 			}
 
-			sendChanWithExit(ctx, ch, frameIns)
-			if frameIns.isLastFrame {
+			isLastFrame := frameIns.isLastFrame
+
+			if !sendChanWithExit(ctx, ch, frameIns) {
+				frameIns.releaseBuf() // ctx 已取消、帧被丢弃，缓冲必须归还
+				return
+			}
+
+			if isLastFrame {
 				return
 			}
 		}
@@ -164,8 +171,11 @@ func (dec *decryptorStream) decrypt(ctx context.Context, encryptedFrameCh chan *
 
 			nonce := makeNonce(dec.fileHeader.BaseNonce, frameIns.isLastFrame, frameIns.index)
 
-			decryptedBytes, err := dec.aesGCM.Open(nil, nonce, frameIns.data, dec.fileHeader.AAD)
+			// 就地解密：GCM 明确允许用 ciphertext[:0] 作为 dst，
+			// 因此不需要再取一块输出缓冲，大文件下每帧少一次约 1MB 的分配
+			decryptedBytes, err := dec.aesGCM.Open(frameIns.data[:0], nonce, frameIns.data, dec.fileHeader.AAD)
 			if err != nil {
+				frameIns.releaseBuf()
 				e := utils.ErrAESDecrypt().WithCause(err)
 				mlog.Error(e.String())
 				sendChanWithExit(ctx, decryptedFrameCh, &frame{e: e})
@@ -174,7 +184,10 @@ func (dec *decryptorStream) decrypt(ctx context.Context, encryptedFrameCh chan *
 
 			frameIns.data = decryptedBytes
 
-			sendChanWithExit(ctx, decryptedFrameCh, frameIns)
+			if !sendChanWithExit(ctx, decryptedFrameCh, frameIns) {
+				frameIns.releaseBuf() // ctx 已取消、帧被丢弃，缓冲必须归还
+				return
+			}
 		}
 	}
 }
@@ -211,6 +224,8 @@ ALL:
 
 			for frameIns != nil && frameIns.index == writeIndex {
 				_, err := writer.Write(frameIns.data)
+				frameIns.releaseBuf() // 已写入文件，缓冲可以归还池中
+
 				if err != nil {
 					e = utils.ErrWriteDecFile().WithCause(err)
 					mlog.Error(e.String())
