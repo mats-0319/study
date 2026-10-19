@@ -129,15 +129,12 @@ func (enc *encryptorStream) read(ctx context.Context, ch chan *frame, originFile
 	}
 	defer file.Close()
 
-	reader := bufio.NewReaderSize(file, 0)
-	counter := int32(0)
-
-	for {
+	for counter := int32(0); ; {
 		select {
 		case <-ctx.Done():
 			return
 		default:
-			originFrame, e := readExact(reader, utils.FrameSize)
+			originFrame, e := readExact(file, utils.FrameSize)
 			if e != nil {
 				sendChanWithExit(ctx, ch, &frame{e: e})
 				return

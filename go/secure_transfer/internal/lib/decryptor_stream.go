@@ -118,9 +118,7 @@ func (dec *decryptorStream) read(ctx context.Context, ch chan *frame, encFile st
 	}
 	defer file.Close()
 
-	reader := bufio.NewReaderSize(file, 9+utils.FrameSize+16)
-
-	_, e := readFileHeader(reader)
+	_, e := readFileHeader(file)
 	if e != nil {
 		sendChanWithExit(ctx, ch, &frame{e: e})
 		return
@@ -133,7 +131,7 @@ func (dec *decryptorStream) read(ctx context.Context, ch chan *frame, encFile st
 		default:
 			frameIns := &frame{}
 
-			e = frameIns.deserialize(reader, index)
+			e = frameIns.deserialize(file, index)
 			if e != nil {
 				sendChanWithExit(ctx, ch, &frame{e: e})
 				return

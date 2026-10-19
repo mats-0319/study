@@ -16,6 +16,10 @@ type frame struct {
 }
 
 func (f *frame) serialize() {
+	if len(f.data) < 9+utils.GCMTagLength {
+		panic("serialize: frame payload not produced by Seal with 9-byte prefix")
+	}
+
 	var fixed [9]byte
 	if f.isLastFrame {
 		fixed[0] = 1
@@ -71,7 +75,7 @@ func (f *frame) deserialize(reader io.Reader, index int) (e *utils.Error) {
 	}
 
 	length := (int32(fixed[5]) << 24) + (int32(fixed[6]) << 16) + (int32(fixed[7]) << 8) + int32(fixed[8])
-	if length < 0 || length > utils.FrameSize+utils.GCMTagLength {
+	if length < utils.GCMTagLength || length > utils.FrameSize+utils.GCMTagLength {
 		e = utils.ErrFrame().WithParam("invalid frame payload size", length)
 		mlog.Error(e.String())
 		return
