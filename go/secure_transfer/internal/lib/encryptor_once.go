@@ -38,7 +38,7 @@ func (enc *encryptorOnce) Encrypt(originFile string, encFile string) (e *utils.E
 	}
 
 	fhLen := len(enc.fileHeader.Encoded)
-	length := 1 + fhLen + len(originFileBytes) + 16
+	length := 1 + fhLen + len(originFileBytes) + utils.GCMTagLength
 
 	fileBytes := make([]byte, 0, length)
 	fileBytes = append(fileBytes, byte(fhLen))

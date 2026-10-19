@@ -36,6 +36,7 @@ func (dec *decryptorStream) Decrypt(encFile string, decFile string) (e *utils.Er
 	decryptedFrameCh := make(chan *frame, channelCache)
 
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	var wg sync.WaitGroup
 	wg.Go(func() {

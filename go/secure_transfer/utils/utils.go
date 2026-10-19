@@ -14,6 +14,8 @@ var Curve = ecdh.X25519()
 
 // FirstFile get first file which name matched 'file base name'
 // - fileBaseName: file name without extension
+//
+// 强制限制文件名格式中只能有一个点，即仅匹配文件名形如'[fileBaseName].xxx'的文件，这样可以方便取扩展名、实现往返名称对称
 func FirstFile(fileBaseName string) (fileName string, fileSize int64, e *Error) {
 	entry, err := os.ReadDir("./")
 	if err != nil {
@@ -27,8 +29,7 @@ func FirstFile(fileBaseName string) (fileName string, fileSize int64, e *Error) 
 			continue // ignore folder
 		}
 
-		// match file name, require: '[fileBaseName].xxx',
-		// 强制限制文件名格式中只能有一个点，是为了方便取扩展名、往返名称对称
+		// match file name
 		entryName := entry[i].Name()
 		if !strings.HasPrefix(entryName, fileBaseName+".") ||
 			!(strings.Index(entryName, ".") == strings.LastIndex(entryName, ".")) {

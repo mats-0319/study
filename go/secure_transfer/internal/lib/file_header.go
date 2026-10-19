@@ -48,6 +48,12 @@ func (fh *FileHeader) serialize() (e *utils.Error) {
 	pubKStart := nonceStart + utils.AESBaseNonceLength
 	aadStart := pubKStart + utils.PublicKeyLength
 	length := aadStart + utils.FileHeaderAADLength
+	if length != utils.FileHeaderLength {
+		// 通常情况下不会进入这个分支，写在这里是为了保证后续文件头有修改时，如果整体长度计算规则没有匹配，这里可以第一时间发现
+		e = utils.ErrFileHeader().WithParam("mismatched length", length).WithParam("want", utils.FileHeaderLength)
+		mlog.Error(e.String())
+		return
+	}
 
 	fh.Encoded = make([]byte, length)
 
@@ -130,9 +136,14 @@ func (fh *FileHeader) canSerialize() (e *utils.Error) {
 }
 
 func (fh *FileHeader) canDeserialize(data []byte) (e *utils.Error) {
-	switch {
-	case len(data) < 7:
+	if len(data) < 7 {
+		// 外部已经限制了输入内容长度，通常情况下不会进入该分支，但是因为后续要用到数组索引，所以这里还是写一下
 		e = utils.ErrFileHeader().WithParam("fixed length", len(data))
+		mlog.Error(e.String())
+		return
+	}
+
+	switch {
 	case string(data[:2]) != utils.FileHeaderStart:
 		e = utils.ErrFileHeader().WithParam("start", string(data[:2]))
 	case !utils.IsEncryptMethod(data[2]):

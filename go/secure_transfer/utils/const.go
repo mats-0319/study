@@ -18,9 +18,10 @@ const (
 	AESBaseNonceLength  = 7 // aes-gcm nonce: 12 = 7 + 1 + 4
 	PublicKeyLength     = 32
 	FileHeaderAADLength = 32 // sha256 length
-	FileHeaderLength    = 94
+	FileHeaderLength    = 2 + 1 + 4 + DeriveKeySaltLength + AESBaseNonceLength + PublicKeyLength + FileHeaderAADLength
 
 	DeriveKeyLength = 32 // 32 Bytes, match AES-256
+	GCMTagLength    = 16 // 加密后的密文比明文多出来的长度
 
 	OnceEncMaxSize = 10 * 1024 * 1024 // 10 MB
 	FrameSize      = 1024 * 1024      // 1 MB

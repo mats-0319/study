@@ -15,27 +15,30 @@ type frame struct {
 	e           *utils.Error
 }
 
-func (f *frame) serialize() []byte {
-	res := make([]byte, 9)
+func (f *frame) serialize() {
+	var fixed [9]byte
 	if f.isLastFrame {
-		res[0] = 1
+		fixed[0] = 1
 	} else {
-		res[0] = 0
+		fixed[0] = 0
 	}
-	res[1] = byte(f.index >> 24)
-	res[2] = byte(f.index >> 16)
-	res[3] = byte(f.index >> 8)
-	res[4] = byte(f.index)
 
-	length := int32(len(f.data))
-	res[5] = byte(length >> 24)
-	res[6] = byte(length >> 16)
-	res[7] = byte(length >> 8)
-	res[8] = byte(length)
+	// frame index
+	fixed[1] = byte(f.index >> 24)
+	fixed[2] = byte(f.index >> 16)
+	fixed[3] = byte(f.index >> 8)
+	fixed[4] = byte(f.index)
 
-	copy(f.data[:9], res)
+	// payload
+	length := int32(len(f.data) - 9)
+	fixed[5] = byte(length >> 24)
+	fixed[6] = byte(length >> 16)
+	fixed[7] = byte(length >> 8)
+	fixed[8] = byte(length)
 
-	return f.data
+	copy(f.data[:9], fixed[:])
+
+	return
 }
 
 func (f *frame) deserialize(reader io.Reader, index int) (e *utils.Error) {
@@ -68,7 +71,7 @@ func (f *frame) deserialize(reader io.Reader, index int) (e *utils.Error) {
 	}
 
 	length := (int32(fixed[5]) << 24) + (int32(fixed[6]) << 16) + (int32(fixed[7]) << 8) + int32(fixed[8])
-	if length < 0 || length > utils.FrameSize+16 { // '+16'可以兼容加密、解密场景
+	if length < 0 || length > utils.FrameSize+utils.GCMTagLength {
 		e = utils.ErrFrame().WithParam("invalid frame payload size", length)
 		mlog.Error(e.String())
 		return

@@ -41,6 +41,7 @@ func (enc *encryptorStream) Encrypt(originFile string, encFile string) (e *utils
 	encryptedFrameCh := make(chan *frame, channelCache)
 
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	var wg sync.WaitGroup
 	wg.Go(func() {
@@ -128,7 +129,7 @@ func (enc *encryptorStream) read(ctx context.Context, ch chan *frame, originFile
 	}
 	defer file.Close()
 
-	reader := bufio.NewReaderSize(file, utils.FrameSize)
+	reader := bufio.NewReaderSize(file, 0)
 	counter := int32(0)
 
 	for {
@@ -176,7 +177,7 @@ func (enc *encryptorStream) encrypt(ctx context.Context, originFrameCh chan *fra
 				return
 			}
 
-			dst := make([]byte, 9, 9+len(frameIns.data)+16)
+			dst := make([]byte, 9, 9+len(frameIns.data)+utils.GCMTagLength)
 			nonce := makeNonce(enc.fileHeader.BaseNonce, frameIns.isLastFrame, frameIns.index)
 
 			frameIns.data = enc.aesGCM.Seal(dst, nonce, frameIns.data, enc.fileHeader.AAD)
@@ -230,7 +231,8 @@ ALL:
 			frameCache[frameIns.index] = frameIns
 
 			for frameIns != nil && frameIns.index == writeIndex {
-				_, err := writer.Write(frameIns.serialize())
+				frameIns.serialize()
+				_, err := writer.Write(frameIns.data)
 				if err != nil {
 					e = utils.ErrWriteEncFile().WithCause(err)
 					mlog.Error(e.String())
