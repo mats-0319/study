@@ -15,6 +15,11 @@ import (
 	mlog "github.com/mats0319/secure_transfer/utils/log"
 )
 
+const (
+	channelCache = 16
+	workerCount  = 8 // encrypt/decrypt goroutine count
+)
+
 type encryptorStream struct {
 	fileHeader *FileHeader
 	aesGCM     cipher.AEAD
@@ -32,16 +37,19 @@ func (enc *encryptorStream) Encrypt(originFile string, encFile string) (e *utils
 		return
 	}
 
-	originFrameCh := make(chan *frame, 100)
-	encryptedFrameCh := make(chan *frame, 100)
+	originFrameCh := make(chan *frame, channelCache)
+	encryptedFrameCh := make(chan *frame, channelCache)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
 	var wg sync.WaitGroup
-	wg.Go(func() { enc.read(ctx, originFrameCh, originFile) })
+	wg.Go(func() {
+		enc.read(ctx, originFrameCh, originFile)
+		close(originFrameCh)
+	})
 	wg.Go(func() {
 		var wg2 sync.WaitGroup
-		for range 8 {
+		for range workerCount {
 			wg2.Go(func() { enc.encrypt(ctx, originFrameCh, encryptedFrameCh) })
 		}
 		wg2.Wait()
@@ -62,7 +70,7 @@ func (enc *encryptorStream) Encrypt(originFile string, encFile string) (e *utils
 
 func (enc *encryptorStream) init() (e *utils.Error) {
 	// ecdh
-	tempPrivKey, err := utils.Curve().GenerateKey(nil)
+	tempPrivKey, err := utils.Curve.GenerateKey(nil)
 	if err != nil {
 		e = utils.ErrECDH().WithCause(err)
 		mlog.Error(e.String())
@@ -111,18 +119,16 @@ func (enc *encryptorStream) init() (e *utils.Error) {
 }
 
 func (enc *encryptorStream) read(ctx context.Context, ch chan *frame, originFile string) {
-	defer close(ch)
-
 	file, err := os.Open(originFile)
 	if err != nil {
 		e := utils.ErrOpenOriginFile().WithCause(err)
 		mlog.Error(e.String())
-		sendChanUnblocked(ctx, ch, &frame{e: e})
+		sendChanWithExit(ctx, ch, &frame{e: e})
 		return
 	}
 	defer file.Close()
 
-	reader := bufio.NewReaderSize(file, utils.FrameSize*2)
+	reader := bufio.NewReaderSize(file, utils.FrameSize)
 	counter := int32(0)
 
 	for {
@@ -130,20 +136,18 @@ func (enc *encryptorStream) read(ctx context.Context, ch chan *frame, originFile
 		case <-ctx.Done():
 			return
 		default:
-			originFrame := make([]byte, utils.FrameSize, utils.FrameSize+16)
-
-			n, e := readExact(reader, originFrame)
+			originFrame, e := readExact(reader, utils.FrameSize)
 			if e != nil {
-				sendChanUnblocked(ctx, ch, &frame{e: e})
+				sendChanWithExit(ctx, ch, &frame{e: e})
 				return
 			}
 
-			isLastFrame := n < len(originFrame)
+			isLastFrame := len(originFrame) < utils.FrameSize
 
-			sendChanUnblocked(ctx, ch, &frame{
+			sendChanWithExit(ctx, ch, &frame{
 				index:       counter,
 				isLastFrame: isLastFrame,
-				data:        originFrame[:n],
+				data:        originFrame,
 			})
 
 			if isLastFrame {
@@ -168,21 +172,22 @@ func (enc *encryptorStream) encrypt(ctx context.Context, originFrameCh chan *fra
 				return
 			}
 			if frameIns.e != nil {
-				sendChanUnblocked(ctx, encryptedFrameCh, frameIns)
+				sendChanWithExit(ctx, encryptedFrameCh, frameIns)
 				return
 			}
 
+			dst := make([]byte, 9, 9+len(frameIns.data)+16)
 			nonce := makeNonce(enc.fileHeader.BaseNonce, frameIns.isLastFrame, frameIns.index)
 
-			frameIns.data = enc.aesGCM.Seal(nil, nonce, frameIns.data, enc.fileHeader.AAD)
+			frameIns.data = enc.aesGCM.Seal(dst, nonce, frameIns.data, enc.fileHeader.AAD)
 
-			sendChanUnblocked(ctx, encryptedFrameCh, frameIns)
+			sendChanWithExit(ctx, encryptedFrameCh, frameIns)
 		}
 	}
 }
 
 func (enc *encryptorStream) write(ctx context.Context, ch chan *frame, encFile string) (e *utils.Error) {
-	file, err := os.OpenFile(encFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	file, err := os.OpenFile(encFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		e = utils.ErrOpenEncFile().WithCause(err)
 		mlog.Error(e.String())
@@ -250,11 +255,11 @@ ALL:
 	return
 }
 
-func sendChanUnblocked(ctx context.Context, ch chan *frame, frameIns *frame) {
+func sendChanWithExit(ctx context.Context, ch chan *frame, frameIns *frame) {
 	select {
 	case <-ctx.Done():
+		// 如果不加这个分支，则在channel缓冲区满时，即使关闭channel，已经阻塞的goroutine会一直阻塞下去
 		return
 	case ch <- frameIns:
-		// avoid send block even deadlock, when channel buffer is full
 	}
 }

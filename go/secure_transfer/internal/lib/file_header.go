@@ -2,6 +2,7 @@ package lib
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"io"
 	"os"
@@ -42,7 +43,8 @@ func (fh *FileHeader) serialize() (e *utils.Error) {
 		return
 	}
 
-	nonceStart := 7 + utils.DeriveKeySaltLength
+	saltStart := 7
+	nonceStart := saltStart + utils.DeriveKeySaltLength
 	pubKStart := nonceStart + utils.AESBaseNonceLength
 	aadStart := pubKStart + utils.PublicKeyLength
 	length := aadStart + utils.FileHeaderAADLength
@@ -56,7 +58,7 @@ func (fh *FileHeader) serialize() (e *utils.Error) {
 	fh.Encoded[5] = byte(utils.PublicKeyLength)
 	fh.Encoded[6] = byte(utils.FileHeaderAADLength)
 
-	copy(fh.Encoded[7:nonceStart], fh.Salt)
+	copy(fh.Encoded[saltStart:nonceStart], fh.Salt)
 	copy(fh.Encoded[nonceStart:pubKStart], fh.BaseNonce)
 	copy(fh.Encoded[pubKStart:aadStart], fh.PublicKey)
 
@@ -75,43 +77,31 @@ func (fh *FileHeader) Deserialize(encFile string) (e *utils.Error) {
 	}
 	defer file.Close()
 
-	reader := bufio.NewReaderSize(file, utils.FrameSize*2)
+	reader := bufio.NewReaderSize(file, utils.FileHeaderLength)
 
-	fileHeaderLen := make([]byte, 1)
-	_, e = readExact(reader, fileHeaderLen)
-	if e != nil {
-		return e
-	}
-
-	data := make([]byte, fileHeaderLen[0])
-	n, e := readExact(reader, data)
-	if e != nil {
-		return
-	}
-	if n != len(data) {
-		e = utils.ErrFileHeader().
-			WithParam("length", n).
-			WithParam("want", fileHeaderLen[0])
-		mlog.Error(e.String())
-		return
-	}
-
-	e = fh.canDeserialize(data)
+	fileHeaderBytes, e := readFileHeader(reader)
 	if e != nil {
 		return
 	}
 
-	nonceStart := 7 + utils.DeriveKeySaltLength
+	// deserialize
+	e = fh.canDeserialize(fileHeaderBytes)
+	if e != nil {
+		return
+	}
+
+	saltStart := 7
+	nonceStart := saltStart + utils.DeriveKeySaltLength
 	pubKStart := nonceStart + utils.AESBaseNonceLength
 	aadStart := pubKStart + utils.PublicKeyLength
 
-	fh.EncMethod = data[2]
-	fh.Salt = data[7:nonceStart]
-	fh.BaseNonce = data[nonceStart:pubKStart]
-	fh.PublicKey = data[pubKStart:aadStart]
-	fh.AAD = data[aadStart:]
+	fh.EncMethod = fileHeaderBytes[2]
+	fh.Salt = fileHeaderBytes[saltStart:nonceStart]
+	fh.BaseNonce = fileHeaderBytes[nonceStart:pubKStart]
+	fh.PublicKey = fileHeaderBytes[pubKStart:aadStart]
+	fh.AAD = fileHeaderBytes[aadStart:]
 
-	if !utils.CompareBytes(fh.AAD, utils.CalcSHA256(data[:aadStart])) {
+	if !bytes.Equal(fh.AAD, utils.CalcSHA256(fileHeaderBytes[:aadStart])) {
 		e = utils.ErrFileHeader().WithParam("hash not matched", "")
 		mlog.Error(e.String())
 		return
@@ -164,39 +154,53 @@ func (fh *FileHeader) canDeserialize(data []byte) (e *utils.Error) {
 	return
 }
 
-func skipFileHeader(reader io.Reader) (n int64, e *utils.Error) {
-	fileHeaderLen := make([]byte, 1)
-	_, e = readExact(reader, fileHeaderLen)
+func readFileHeader(reader io.Reader) (fileHeaderBytes []byte, e *utils.Error) {
+	fileHeaderLen, e := readExact(reader, 1)
 	if e != nil {
 		return
 	}
-
-	fileHeader := make([]byte, fileHeaderLen[0])
-	_, e = readExact(reader, fileHeader)
-	if e != nil {
+	if fileHeaderLen[0] != utils.FileHeaderLength {
+		e = utils.ErrFileHeader().
+			WithParam("length flag", fileHeaderLen[0]).
+			WithParam("want", utils.FileHeaderLength)
+		mlog.Error(e.String())
 		return
 	}
 
-	n = 1 + int64(fileHeaderLen[0])
+	fileHeaderBytes, e = readExact(reader, int(fileHeaderLen[0]))
+	if e != nil {
+		return
+	}
+	if len(fileHeaderBytes) != int(fileHeaderLen[0]) {
+		e = utils.ErrFileHeader().
+			WithParam("length", len(fileHeaderBytes)).
+			WithParam("want", fileHeaderLen[0])
+		mlog.Error(e.String())
+		return
+	}
 
 	return
 }
 
-func readExact(reader io.Reader, buf []byte) (n int, e *utils.Error) {
-	n, err := io.ReadFull(reader, buf)
-	if err != nil {
-		switch {
-		case err == io.EOF:
-			// 不视为错误
-			break
-		case errors.Is(err, io.ErrUnexpectedEOF):
-			e = utils.ErrReadExact().WithParam("File truncated", "文件被截断")
-			mlog.Error(e.String())
-		default:
-			e = utils.ErrReadExact().WithCause(err)
-			mlog.Error(e.String())
+func readExact(reader io.Reader, length int) (res []byte, e *utils.Error) {
+	res = make([]byte, length)
+	total := 0
+	for total < length { // io.Reader.Read一次可能只读一部分，添加循环保证读到足够数量或者读完
+		n, err := reader.Read(res[total:])
+		total += n
+		if err != nil {
+			res = res[:total]
+
+			if !errors.Is(err, io.EOF) { // 读完了不视为错误，正常返回已读内容
+				e = utils.ErrReadExact().WithCause(err)
+				mlog.Error(e.String())
+			}
+
+			return
 		}
 	}
+
+	res = res[:total]
 
 	return
 }

@@ -43,6 +43,10 @@ func Decrypt() error {
 		dec = lib.NewDecryptorOnce(privKey, fileHeader, encFileSize)
 	case utils.EncryptMethod_Stream:
 		dec = lib.NewDecryptorStream(privKey, fileHeader)
+	default:
+		e = utils.ErrInvalidEncMethod().WithParam("method", fileHeader.EncMethod)
+		mlog.Error(e.String())
+		return e
 	}
 
 	e = dec.Decrypt(encFileName, decFileName)

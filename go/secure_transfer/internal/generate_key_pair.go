@@ -11,7 +11,7 @@ import (
 )
 
 func GenerateKeyPair(overwriteFlag bool) error {
-	privKey, err := utils.Curve().GenerateKey(nil)
+	privKey, err := utils.Curve.GenerateKey(nil)
 	if err != nil {
 		e := utils.ErrGeneratePrivateKey().WithCause(err)
 		mlog.Error(e.String())
@@ -42,7 +42,7 @@ func serializePrivateKey(privKey *ecdh.PrivateKey, overwriteFlag bool) *utils.Er
 	block := &pem.Block{Type: "Private Key", Bytes: privKeyBytes}
 	blockBytes := pem.EncodeToMemory(block)
 
-	if !overwriteFlag {
+	if !overwriteFlag { // 处理`调用方不想覆写已有秘钥`的场景，报错并返回
 		_, err = os.Stat(utils.PrivateKeyFileName)
 		if !os.IsNotExist(err) {
 			e := utils.ErrFileExist().WithCause(err)

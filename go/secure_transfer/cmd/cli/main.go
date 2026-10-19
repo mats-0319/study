@@ -85,12 +85,12 @@ func printHelp() {
 var logger *slog.Logger
 
 func initStdoutLogger() {
-	h, e := mlog.NewHandler(mlog.W_Stdout)
+	l, e := mlog.NewLogger(mlog.W_Stdout, slog.LevelDebug)
 	if e != nil {
 		panic(e)
 	}
 
-	logger = slog.New(h)
+	logger = l
 }
 
 func info(message string) {

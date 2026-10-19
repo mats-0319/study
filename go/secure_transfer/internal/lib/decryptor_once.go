@@ -60,7 +60,7 @@ func (dec *decryptorOnce) Decrypt(encFile string, decFile string) (e *utils.Erro
 
 func (dec *decryptorOnce) init() (e *utils.Error) {
 	// ecdh
-	pubKey, err := utils.Curve().NewPublicKey(dec.fileHeader.PublicKey)
+	pubKey, err := utils.Curve.NewPublicKey(dec.fileHeader.PublicKey)
 	if err != nil {
 		e = utils.ErrECDH().WithCause(err)
 		mlog.Error(e.String())
@@ -109,6 +109,13 @@ func (dec *decryptorOnce) init() (e *utils.Error) {
 }
 
 func (dec *decryptorOnce) getCiphertext(encFile string) (ciphertext []byte, e *utils.Error) {
+	cipherLen := int(dec.encFileSize) - 1 - utils.FileHeaderLength
+	if cipherLen < 0 || cipherLen > utils.OnceEncMaxSize+16 {
+		e = utils.ErrEncryptedFile().WithParam("length", dec.encFileSize)
+		mlog.Error(e.String())
+		return
+	}
+
 	file, err := os.Open(encFile)
 	if err != nil {
 		e = utils.ErrOpenEncFile().WithCause(err)
@@ -117,23 +124,15 @@ func (dec *decryptorOnce) getCiphertext(encFile string) (ciphertext []byte, e *u
 	}
 	defer file.Close()
 
-	reader := bufio.NewReaderSize(file, utils.FrameSize*2)
+	// 通常缓存为1M，剩余内容不足
+	reader := bufio.NewReaderSize(file, min(cipherLen, utils.FrameSize))
 
-	n, e := skipFileHeader(reader)
+	_, e = readFileHeader(reader)
 	if e != nil {
 		return
 	}
-	if dec.encFileSize < n || dec.encFileSize > utils.OnceEncMaxSize {
-		e = utils.ErrEncryptedFile().
-			WithParam("length", dec.encFileSize).
-			WithParam("header length", n).
-			WithParam("max length", utils.OnceEncMaxSize)
-		mlog.Error(e.String())
-		return
-	}
 
-	ciphertext = make([]byte, dec.encFileSize-n)
-	_, e = readExact(reader, ciphertext)
+	ciphertext, e = readExact(reader, cipherLen)
 	if e != nil {
 		return
 	}

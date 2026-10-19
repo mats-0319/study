@@ -18,6 +18,7 @@ const (
 	AESBaseNonceLength  = 7 // aes-gcm nonce: 12 = 7 + 1 + 4
 	PublicKeyLength     = 32
 	FileHeaderAADLength = 32 // sha256 length
+	FileHeaderLength    = 94
 
 	DeriveKeyLength = 32 // 32 Bytes, match AES-256
 

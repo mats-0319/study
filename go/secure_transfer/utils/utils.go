@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"bytes"
 	"crypto/ecdh"
 	"crypto/rand"
 	"crypto/sha256"
@@ -11,10 +10,7 @@ import (
 	mlog "github.com/mats0319/secure_transfer/utils/log"
 )
 
-// Curve use same curve unified
-func Curve() ecdh.Curve {
-	return ecdh.X25519()
-}
+var Curve = ecdh.X25519()
 
 // FirstFile get first file which name matched 'file base name'
 // - fileBaseName: file name without extension
@@ -31,6 +27,14 @@ func FirstFile(fileBaseName string) (fileName string, fileSize int64, e *Error) 
 			continue // ignore folder
 		}
 
+		// match file name, require: '[fileBaseName].xxx',
+		// 强制限制文件名格式中只能有一个点，是为了方便取扩展名、往返名称对称
+		entryName := entry[i].Name()
+		if !strings.HasPrefix(entryName, fileBaseName+".") ||
+			!(strings.Index(entryName, ".") == strings.LastIndex(entryName, ".")) {
+			continue
+		}
+
 		fileInfo, err := entry[i].Info()
 		if err != nil {
 			e = ErrGetFileInfo().WithCause(err).WithParam("name", entry[i].Name())
@@ -38,13 +42,10 @@ func FirstFile(fileBaseName string) (fileName string, fileSize int64, e *Error) 
 			continue
 		}
 
-		// match file name, require: 'message.xxx'
-		if strings.HasPrefix(fileInfo.Name(), fileBaseName+".") &&
-			(strings.Index(fileInfo.Name(), ".") == strings.LastIndex(fileInfo.Name(), ".")) {
-			fileName = fileInfo.Name()
-			fileSize = fileInfo.Size()
-			break
-		}
+		fileName = entryName
+		fileSize = fileInfo.Size()
+
+		break
 	}
 
 	if fileName == "" {
@@ -55,14 +56,10 @@ func FirstFile(fileBaseName string) (fileName string, fileSize int64, e *Error) 
 }
 
 func GenerateRandomBytes(length int) []byte {
-	bytesBuilder := bytes.NewBuffer(nil)
+	data := make([]byte, length)
+	_, _ = rand.Read(data) // err always nil
 
-	for l := 0; l < length; {
-		n, _ := bytesBuilder.WriteString(rand.Text()) // err always nil
-		l += n
-	}
-
-	return bytesBuilder.Bytes()[:length]
+	return data
 }
 
 func CalcSHA256(data []byte) []byte {
@@ -70,20 +67,4 @@ func CalcSHA256(data []byte) []byte {
 	hasher.Write(data)
 
 	return hasher.Sum(nil)
-}
-
-func CompareBytes(a []byte, b []byte) (isEqual bool) {
-	if len(a) != len(b) {
-		return
-	}
-
-	isEqual = true
-	for i := range a {
-		if a[i] != b[i] {
-			isEqual = false
-			break
-		}
-	}
-
-	return
 }

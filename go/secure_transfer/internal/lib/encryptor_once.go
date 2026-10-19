@@ -1,7 +1,6 @@
 package lib
 
 import (
-	"bufio"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/ecdh"
@@ -38,38 +37,15 @@ func (enc *encryptorOnce) Encrypt(originFile string, encFile string) (e *utils.E
 		return
 	}
 
-	encryptedBytes := enc.aesGCM.Seal(nil, enc.nonce, originFileBytes, enc.fileHeader.AAD)
+	fhLen := len(enc.fileHeader.Encoded)
+	length := 1 + fhLen + len(originFileBytes) + 16
 
-	file, err := os.OpenFile(encFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		e = utils.ErrOpenEncFile().WithCause(err)
-		mlog.Error(e.String())
-		return
-	}
-	defer file.Close()
+	fileBytes := make([]byte, 0, length)
+	fileBytes = append(fileBytes, byte(fhLen))
+	fileBytes = append(fileBytes, enc.fileHeader.Encoded...)
+	fileBytes = enc.aesGCM.Seal(fileBytes, enc.nonce, originFileBytes, enc.fileHeader.AAD)
 
-	writer := bufio.NewWriter(file)
-
-	err = writer.WriteByte(byte(len(enc.fileHeader.Encoded)))
-	if err != nil {
-		e = utils.ErrWriteEncFile().WithCause(err)
-		mlog.Error(e.String())
-		return
-	}
-	_, err = writer.Write(enc.fileHeader.Encoded)
-	if err != nil {
-		e = utils.ErrWriteEncFile().WithCause(err)
-		mlog.Error(e.String())
-		return
-	}
-	_, err = writer.Write(encryptedBytes)
-	if err != nil {
-		e = utils.ErrWriteEncFile().WithCause(err)
-		mlog.Error(e.String())
-		return
-	}
-
-	err = writer.Flush()
+	err = os.WriteFile(encFile, fileBytes, 0644)
 	if err != nil {
 		e = utils.ErrWriteEncFile().WithCause(err)
 		mlog.Error(e.String())
@@ -81,7 +57,7 @@ func (enc *encryptorOnce) Encrypt(originFile string, encFile string) (e *utils.E
 
 func (enc *encryptorOnce) init() (e *utils.Error) {
 	// ecdh
-	tempPrivKey, err := utils.Curve().GenerateKey(nil)
+	tempPrivKey, err := utils.Curve.GenerateKey(nil)
 	if err != nil {
 		e = utils.ErrECDH().WithCause(err)
 		mlog.Error(e.String())

@@ -6,9 +6,9 @@
 
 > 以命令行程序使用，参考：`/cmd/cli/script/manual.md`
 > 以图形化界面程序使用，参考：`/cmd/gui/components/utils.go helpText`
->
+
 > 我们会提供一些平台的可执行程序，但我们建议你阅读源代码后自行编译。
->
+
 > 声明：`/cmd/cli/sample/`路径下的私钥等文件仅作为演示使用
 
 程序会在当前目录创建和读取文件，请在一个单独的路径中启动程序。
@@ -30,56 +30,15 @@ fyne依赖cgo，如果编译环境和你的系统的glibc版本不兼容，则�
 因此我们提供的gui的二进制文件在你的设备上无法运行是有可能的，附使用截图。
 
 ![linux](doc/linux_use.png)
-
-## 实现
-
-方案：使用椭圆曲线协商算法得到共享密钥，共享密钥派生得到最终加密密钥，使用对称加密算法加密
-
-- 曲线与密钥协商算法：Curve25519 X25519
-- 最终加密密钥派生算法：sha256
-- 对称加密算法：aes-gcm
-- 加密方式：
-    - 文件大小 <10m：一次性读取到内存加密
-    - 文件大小 >10m：流式加密
-
-过程：
-
-1. 甲生成一个临时密钥对，使用临时私钥和乙的公钥一起协商出共享密钥，共享密钥派生得到最终加密密钥
-2. 甲使用最终加密密钥加密想要发送的消息，将临时公钥、nonce、密文拼在一起，发送给乙
-3. 乙使用自己的私钥和临时公钥一起协商出共享密钥，派生得到最终加密密钥，结合nonce，解密密文
-
-加密文件编码规则：
-
-```txt
-header len + 'ST' + enc method + 
-salt len + base nonce len + pubK len + aad len +
-salt + base nonce + pubK + aad + 
-ciphertext
-```
-
-- `header len`：整个文件头（一直到正文之前）的长度
-    - 本工具中长度固定为94，即加密文件将固定以`^ST`开头
-- `ST`：开头标记
-- `enc method`：一次性读取到内存中加密/流式加密
-- `salt`：用于密钥派生的salt
-    - 本工具中长度固定为16
-- `base nonce`：aes-gcm base nonce
-    - 本工具中长度固定为7
-    - 一次性加密nonce：base nonce后面补0凑够位数
-    - 流式加密nonce：7+1+4，base nonce + 末帧标识 + 帧索引
-- `pubK`：用于解密-协商密钥的公钥
-    - 本工具中长度固定为32
-- `aad`：文件头除了aad以外的环节的hash（见编码规则，aad正文之前，包括aad长度
-- `ciphertext`：密文
-    - 流式加密密文（一帧）：
-        - 末帧标识：1 Byte
-        - 帧索引：4 Byte
-        - 有效内容长度：4 Byte
-        - 有效内容：x Byte
+![windows](doc/windows_use.png)
 
 ## 技术准备
 
 [见tech_prepare.md](doc/tech_prepare.md)
+
+## 技术细节
+
+[见design.md](doc/design.md)
 
 ## 开发计划
 

@@ -32,16 +32,19 @@ func (dec *decryptorStream) Decrypt(encFile string, decFile string) (e *utils.Er
 		return
 	}
 
-	encryptedFrameCh := make(chan *frame, 100)
-	decryptedFrameCh := make(chan *frame, 100)
+	encryptedFrameCh := make(chan *frame, channelCache)
+	decryptedFrameCh := make(chan *frame, channelCache)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
 	var wg sync.WaitGroup
-	wg.Go(func() { dec.read(ctx, encryptedFrameCh, encFile) })
+	wg.Go(func() {
+		dec.read(ctx, encryptedFrameCh, encFile)
+		close(encryptedFrameCh)
+	})
 	wg.Go(func() {
 		var wg2 sync.WaitGroup
-		for range 8 {
+		for range workerCount {
 			wg2.Go(func() { dec.decrypt(ctx, encryptedFrameCh, decryptedFrameCh) })
 		}
 		wg2.Wait()
@@ -62,7 +65,7 @@ func (dec *decryptorStream) Decrypt(encFile string, decFile string) (e *utils.Er
 
 func (dec *decryptorStream) init() (e *utils.Error) {
 	// ecdh
-	pubKey, err := utils.Curve().NewPublicKey(dec.fileHeader.PublicKey)
+	pubKey, err := utils.Curve.NewPublicKey(dec.fileHeader.PublicKey)
 	if err != nil {
 		e = utils.ErrECDH().WithCause(err)
 		mlog.Error(e.String())
@@ -105,22 +108,20 @@ func (dec *decryptorStream) init() (e *utils.Error) {
 }
 
 func (dec *decryptorStream) read(ctx context.Context, ch chan *frame, encFile string) {
-	defer close(ch)
-
 	file, err := os.Open(encFile)
 	if err != nil {
 		e := utils.ErrOpenEncFile().WithCause(err)
 		mlog.Error(e.String())
-		sendChanUnblocked(ctx, ch, &frame{e: e})
+		sendChanWithExit(ctx, ch, &frame{e: e})
 		return
 	}
 	defer file.Close()
 
-	reader := bufio.NewReaderSize(file, utils.FrameSize*2)
+	reader := bufio.NewReaderSize(file, 9+utils.FrameSize+16)
 
-	_, e := skipFileHeader(reader)
+	_, e := readFileHeader(reader)
 	if e != nil {
-		sendChanUnblocked(ctx, ch, &frame{e: e})
+		sendChanWithExit(ctx, ch, &frame{e: e})
 		return
 	}
 
@@ -133,12 +134,11 @@ func (dec *decryptorStream) read(ctx context.Context, ch chan *frame, encFile st
 
 			e = frameIns.deserialize(reader, index)
 			if e != nil {
-				sendChanUnblocked(ctx, ch, &frame{e: e})
+				sendChanWithExit(ctx, ch, &frame{e: e})
 				return
 			}
 
-			sendChanUnblocked(ctx, ch, frameIns)
-
+			sendChanWithExit(ctx, ch, frameIns)
 			if frameIns.isLastFrame {
 				return
 			}
@@ -159,7 +159,7 @@ func (dec *decryptorStream) decrypt(ctx context.Context, encryptedFrameCh chan *
 				return
 			}
 			if frameIns.e != nil {
-				sendChanUnblocked(ctx, decryptedFrameCh, frameIns)
+				sendChanWithExit(ctx, decryptedFrameCh, frameIns)
 				return
 			}
 
@@ -169,13 +169,13 @@ func (dec *decryptorStream) decrypt(ctx context.Context, encryptedFrameCh chan *
 			if err != nil {
 				e := utils.ErrAESDecrypt().WithCause(err)
 				mlog.Error(e.String())
-				sendChanUnblocked(ctx, decryptedFrameCh, &frame{e: e})
+				sendChanWithExit(ctx, decryptedFrameCh, &frame{e: e})
 				return
 			}
 
 			frameIns.data = decryptedBytes
 
-			sendChanUnblocked(ctx, decryptedFrameCh, frameIns)
+			sendChanWithExit(ctx, decryptedFrameCh, frameIns)
 		}
 	}
 }
@@ -184,7 +184,7 @@ func (dec *decryptorStream) write(ctx context.Context, ch chan *frame, decFile s
 	frameCache := make(map[int32]*frame)
 	writeIndex := int32(0)
 
-	file, err := os.OpenFile(decFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	file, err := os.OpenFile(decFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		e = utils.ErrOpenDecFile().WithCause(err)
 		mlog.Error(e.String())
@@ -226,6 +226,8 @@ ALL:
 		}
 	}
 
+	// for循环中有return分支，即程序可能不会执行flush，这会导致最终获得一个只写了一部分的中间文件
+	// 这是可以接受的，上层调用方会删除这个中间文件
 	err = writer.Flush()
 	if err != nil {
 		e = utils.ErrWriteDecFile().WithCause(err)

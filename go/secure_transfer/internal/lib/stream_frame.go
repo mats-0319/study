@@ -16,7 +16,7 @@ type frame struct {
 }
 
 func (f *frame) serialize() []byte {
-	res := make([]byte, 9+len(f.data))
+	res := make([]byte, 9)
 	if f.isLastFrame {
 		res[0] = 1
 	} else {
@@ -33,19 +33,18 @@ func (f *frame) serialize() []byte {
 	res[7] = byte(length >> 8)
 	res[8] = byte(length)
 
-	copy(res[9:], f.data)
+	copy(f.data[:9], res)
 
-	return res
+	return f.data
 }
 
 func (f *frame) deserialize(reader io.Reader, index int) (e *utils.Error) {
-	fixed := make([]byte, 9)
-	n, e := readExact(reader, fixed)
+	fixed, e := readExact(reader, 9)
 	if e != nil {
 		return
 	}
-	if n < 9 {
-		e = utils.ErrFrame().WithParam("length", n).WithParam("want", 9)
+	if len(fixed) < 9 {
+		e = utils.ErrFrame().WithParam("length", len(fixed)).WithParam("want", 9)
 		mlog.Error(e.String())
 		return
 	}
@@ -56,7 +55,7 @@ func (f *frame) deserialize(reader io.Reader, index int) (e *utils.Error) {
 	case 1:
 		f.isLastFrame = true
 	default:
-		e = utils.ErrFrame().WithParam("last flag", fixed[0])
+		e = utils.ErrFrame().WithParam("invalid last flag", fixed[0])
 		mlog.Error(e.String())
 		return
 	}
@@ -69,19 +68,23 @@ func (f *frame) deserialize(reader io.Reader, index int) (e *utils.Error) {
 	}
 
 	length := (int32(fixed[5]) << 24) + (int32(fixed[6]) << 16) + (int32(fixed[7]) << 8) + int32(fixed[8])
-	if length > utils.FrameSize+16 {
-		e = utils.ErrFrame().WithParam("should less than 1M, get: ", length)
+	if length < 0 || length > utils.FrameSize+16 { // '+16'可以兼容加密、解密场景
+		e = utils.ErrFrame().WithParam("invalid frame payload size", length)
 		mlog.Error(e.String())
 		return
 	}
 
-	data := make([]byte, length)
-	n, e = readExact(reader, data)
+	data, e := readExact(reader, int(length))
 	if e != nil {
 		return
 	}
+	if len(data) != int(length) {
+		e = utils.ErrFrame().WithParam("length", len(data)).WithParam("want", length)
+		mlog.Error(e.String())
+		return
+	}
 
-	f.data = data[:n]
+	f.data = data
 
 	return
 }
