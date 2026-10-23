@@ -7,6 +7,7 @@
     <directory value="$PROJECT_DIR$/go/secure_transfer/cmd/cli" />
     <filePath value="$PROJECT_DIR$/go/encrypt_transmission/main.go" />
     <output_directory value="$PROJECT_DIR$/go/secure_transfer/cmd/cli/sample" />
+    <pty_enabled value="true" />
     <method v="2" />
   </configuration>
 </component>

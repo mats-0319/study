@@ -12,9 +12,9 @@ import (
 
 type FileHeader struct {
 	EncMethod utils.EncryptMethod
-	Salt      []byte // for derive key
-	BaseNonce []byte // aes-gcm base nonce
 	PublicKey []byte
+	BaseNonce []byte // aes-gcm base nonce
+	Salt      []byte // for derive key
 	AAD       []byte
 
 	Encoded []byte
@@ -23,9 +23,9 @@ type FileHeader struct {
 func NewFileHeader(encMethod utils.EncryptMethod, pubKey []byte) (*FileHeader, *utils.Error) {
 	fh := &FileHeader{
 		EncMethod: encMethod,
-		Salt:      utils.GenerateRandomBytes(utils.DeriveKeySaltLength),
-		BaseNonce: utils.GenerateRandomBytes(utils.AESBaseNonceLength),
 		PublicKey: pubKey,
+		BaseNonce: utils.GenerateRandomBytes(utils.AESBaseNonceLength),
+		Salt:      utils.GenerateRandomBytes(utils.DeriveKeySaltLength),
 	}
 
 	e := fh.serialize()
@@ -42,33 +42,27 @@ func (fh *FileHeader) serialize() (e *utils.Error) {
 		return
 	}
 
-	saltStart := 7
-	nonceStart := saltStart + utils.DeriveKeySaltLength
-	pubKStart := nonceStart + utils.AESBaseNonceLength
-	aadStart := pubKStart + utils.PublicKeyLength
-	length := aadStart + utils.FileHeaderAADLength
-	if length != utils.FileHeaderLength {
-		// 通常情况下不会进入这个分支，写在这里是为了保证后续文件头有修改时，如果整体长度计算规则没有匹配，这里可以第一时间发现
-		e = utils.ErrFileHeader().WithParam("mismatched length", length).WithParam("want", utils.FileHeaderLength)
-		mlog.Error(e.String())
-		return
-	}
+	fh.Encoded = make([]byte, utils.FileHeaderLength-1)
 
-	fh.Encoded = make([]byte, length)
-
-	copy(fh.Encoded[:2], utils.FileHeaderStart)
+	copy(fh.Encoded[:2], utils.FileHeaderFlag)
 	fh.Encoded[2] = fh.EncMethod
-	fh.Encoded[3] = byte(utils.DeriveKeySaltLength)
-	fh.Encoded[4] = byte(utils.AESBaseNonceLength)
-	fh.Encoded[5] = byte(utils.PublicKeyLength)
-	fh.Encoded[6] = byte(utils.FileHeaderAADLength)
 
-	copy(fh.Encoded[saltStart:nonceStart], fh.Salt)
-	copy(fh.Encoded[nonceStart:pubKStart], fh.BaseNonce)
-	copy(fh.Encoded[pubKStart:aadStart], fh.PublicKey)
+	start := 3
+	fh.Encoded[start] = utils.PublicKeyLength
+	copy(fh.Encoded[start+1:start+1+utils.PublicKeyLength], fh.PublicKey)
 
-	fh.AAD = utils.CalcSHA256(fh.Encoded[:aadStart])
-	copy(fh.Encoded[aadStart:], fh.AAD)
+	start += 1 + utils.PublicKeyLength
+	fh.Encoded[start] = utils.AESBaseNonceLength
+	copy(fh.Encoded[start+1:start+1+utils.AESBaseNonceLength], fh.BaseNonce)
+
+	start += 1 + utils.AESBaseNonceLength
+	fh.Encoded[start] = utils.DeriveKeySaltLength
+	copy(fh.Encoded[start+1:start+1+utils.DeriveKeySaltLength], fh.Salt)
+
+	start += 1 + utils.DeriveKeySaltLength
+	fh.AAD = utils.CalcSHA256(fh.Encoded[:start])
+	fh.Encoded[start] = utils.FileHeaderAADLength
+	copy(fh.Encoded[start+1:], fh.AAD)
 
 	return
 }
@@ -95,18 +89,25 @@ func (fh *FileHeader) Deserialize(encFile string) (e *utils.Error) {
 		return
 	}
 
-	saltStart := 7
-	nonceStart := saltStart + utils.DeriveKeySaltLength
-	pubKStart := nonceStart + utils.AESBaseNonceLength
-	aadStart := pubKStart + utils.PublicKeyLength
-
 	fh.EncMethod = fileHeaderBytes[2]
-	fh.Salt = fileHeaderBytes[saltStart:nonceStart]
-	fh.BaseNonce = fileHeaderBytes[nonceStart:pubKStart]
-	fh.PublicKey = fileHeaderBytes[pubKStart:aadStart]
-	fh.AAD = fileHeaderBytes[aadStart:]
 
-	if !bytes.Equal(fh.AAD, utils.CalcSHA256(fileHeaderBytes[:aadStart])) {
+	index := 3
+	length := int(fileHeaderBytes[index])
+	fh.PublicKey = fileHeaderBytes[index+1 : index+1+length]
+
+	index += 1 + length
+	length = int(fileHeaderBytes[index])
+	fh.BaseNonce = fileHeaderBytes[index+1 : index+1+length]
+
+	index += 1 + length
+	length = int(fileHeaderBytes[index])
+	fh.Salt = fileHeaderBytes[index+1 : index+1+length]
+
+	index += 1 + length
+	length = int(fileHeaderBytes[index])
+	fh.AAD = fileHeaderBytes[index+1 : index+1+length]
+
+	if !bytes.Equal(fh.AAD, utils.CalcSHA256(fileHeaderBytes[:index])) {
 		e = utils.ErrFileHeader().WithParam("hash not matched", "")
 		mlog.Error(e.String())
 		return
@@ -119,12 +120,12 @@ func (fh *FileHeader) canSerialize() (e *utils.Error) {
 	switch {
 	case !utils.IsEncryptMethod(fh.EncMethod):
 		e = utils.ErrFileHeader().WithParam("enc method", fh.EncMethod)
-	case len(fh.Salt) != utils.DeriveKeySaltLength:
-		e = utils.ErrFileHeader().WithParam("salt", fh.Salt)
-	case len(fh.BaseNonce) != utils.AESBaseNonceLength:
-		e = utils.ErrFileHeader().WithParam("base_nonce", fh.BaseNonce)
 	case len(fh.PublicKey) != utils.PublicKeyLength:
 		e = utils.ErrFileHeader().WithParam("public_key", fh.PublicKey)
+	case len(fh.BaseNonce) != utils.AESBaseNonceLength:
+		e = utils.ErrFileHeader().WithParam("base_nonce", fh.BaseNonce)
+	case len(fh.Salt) != utils.DeriveKeySaltLength:
+		e = utils.ErrFileHeader().WithParam("salt", fh.Salt)
 	}
 
 	if e != nil {
@@ -135,26 +136,13 @@ func (fh *FileHeader) canSerialize() (e *utils.Error) {
 }
 
 func (fh *FileHeader) canDeserialize(data []byte) (e *utils.Error) {
-	if len(data) < 7 {
-		// 外部已经限制了输入内容长度，通常情况下不会进入该分支，但是因为后续要用到数组索引，所以这里还是写一下
-		e = utils.ErrFileHeader().WithParam("fixed length", len(data))
-		mlog.Error(e.String())
-		return
-	}
-
 	switch {
-	case string(data[:2]) != utils.FileHeaderStart:
-		e = utils.ErrFileHeader().WithParam("start", string(data[:2]))
+	case len(data) != utils.FileHeaderLength-1:
+		e = utils.ErrFileHeader().WithParam("fixed length", len(data))
+	case string(data[:2]) != utils.FileHeaderFlag:
+		e = utils.ErrFileHeader().WithParam("flag", string(data[:2]))
 	case !utils.IsEncryptMethod(data[2]):
 		e = utils.ErrFileHeader().WithParam("enc method", data[2])
-	case data[3] != utils.DeriveKeySaltLength:
-		e = utils.ErrFileHeader().WithParam("salt len", data[3])
-	case data[4] != utils.AESBaseNonceLength:
-		e = utils.ErrFileHeader().WithParam("base nonce len", data[4])
-	case data[5] != utils.PublicKeyLength:
-		e = utils.ErrFileHeader().WithParam("pubK len", data[5])
-	case data[6] != uint8(utils.FileHeaderAADLength):
-		e = utils.ErrFileHeader().WithParam("aad len", data[6])
 	}
 
 	if e != nil {
@@ -176,7 +164,7 @@ func readFileHeader(reader io.Reader) (fileHeaderBytes []byte, e *utils.Error) {
 		mlog.Error(e.String())
 		return
 	}
-	if fileHeaderLen[0] != utils.FileHeaderLength {
+	if fileHeaderLen[0] != utils.FileHeaderLength-1 {
 		e = utils.ErrFileHeader().
 			WithParam("length flag", fileHeaderLen[0]).
 			WithParam("want", utils.FileHeaderLength)

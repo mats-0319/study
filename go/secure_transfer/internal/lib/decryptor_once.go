@@ -109,7 +109,7 @@ func (dec *decryptorOnce) init() (e *utils.Error) {
 }
 
 func (dec *decryptorOnce) getCiphertext(encFile string) (ciphertext []byte, e *utils.Error) {
-	cipherLen := int(dec.encFileSize) - 1 - utils.FileHeaderLength
+	cipherLen := int(dec.encFileSize) - utils.FileHeaderLength
 	if cipherLen < 0 || cipherLen > utils.OnceEncMaxSize+utils.GCMTagLength {
 		e = utils.ErrEncryptedFile().WithParam("length", dec.encFileSize)
 		mlog.Error(e.String())

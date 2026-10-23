@@ -1,8 +1,8 @@
 package utils
 
 const (
-	FileHeaderStart = "ST"
-	DeriveKeyInfo   = "secure transfer derive key info"
+	FileHeaderFlag = "ST"
+	DeriveKeyInfo  = "aes-gcm 256 encrypt key"
 
 	PrivateKeyFileName = "priv.key"
 	PublicKeyFileName  = "PUB.KEY"
@@ -15,10 +15,10 @@ const (
 
 const (
 	DeriveKeySaltLength = 16
-	AESBaseNonceLength  = 7 // aes-gcm nonce: 12 = 7 + 1 + 4
 	PublicKeyLength     = 32
+	AESBaseNonceLength  = 7  // aes-gcm nonce: 12 = 7 + 1 + 4
 	FileHeaderAADLength = 32 // sha256 length
-	FileHeaderLength    = 2 + 1 + 4 + DeriveKeySaltLength + AESBaseNonceLength + PublicKeyLength + FileHeaderAADLength
+	FileHeaderLength    = 1 + 2 + 1 + 4 + DeriveKeySaltLength + AESBaseNonceLength + PublicKeyLength + FileHeaderAADLength
 
 	DeriveKeyLength = 32 // 32 Bytes, match AES-256
 	GCMTagLength    = 16 // 加密后的密文比明文多出来的长度
